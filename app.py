@@ -156,7 +156,10 @@ else:
 # Add format line if SSA/ASS subtitle format
 if settings['format'] == 'ssa' or settings['format'] == 'ass':
     file.write('[Script Info]\n')
-    file.write('Timer: 100,0000\n')
+
+    # Hack for videojs-ass
+    file.write('PlayResX: 1280\n')
+    file.write('PlayResY: 720\n')
 
     file.write('\n[V4 Styles]\n')
     file.write(settings['ssa_style_format'] + '\n')
