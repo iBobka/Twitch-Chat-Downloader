@@ -45,7 +45,6 @@ class Messages(list):
         if self.cursor is None:
             url = self.base_url + "?content_offset_seconds=0"
         else:
-            raise StopIteration
             url = self.base_url + "?cursor=" + self.cursor
 
         if settings['cooldown'] > 0:
