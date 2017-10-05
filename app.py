@@ -18,7 +18,7 @@ with open(settings_file, 'r') as settings_file:
     settings = json.load(settings_file)
 
 # Check for outdated settings.json
-if settings['version'].startswith(1):
+if settings['version'].startswith("1"):
     print("Please update your settings.json (see example.settings.json for examples)")
     sys.exit(1)
 
