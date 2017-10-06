@@ -38,8 +38,8 @@ To override default options, copy `example.config.json` into `example.json` and 
 ## Formats
 
 | Format | Description |
-| ------- | ----------- |
-| `ass` | Advanced SubStation Alpha |
+| ------ | ----------- |
+| `ass` or `ssa` | Advanced SubStation Alpha |
 
 ## Notes
 

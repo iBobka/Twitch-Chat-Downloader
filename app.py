@@ -71,11 +71,11 @@ class Messages(list):
         return self.pop(0)
 
 class SubtitlesASS(object):
-    def __init__(self, video_id):
+    def __init__(self, video_id, format="ass"):
         filename = settings['filename_format'].format(
             directory=settings['directory'],
             video_id=video_id,
-            format='ass'
+            format=format
         )
         self.file = open(filename, mode='w+')
 
@@ -121,8 +121,8 @@ if __name__ == "__main__":
 
     subtitle_drivers = set()
     for format in settings['formats']:
-        if format == "ass":
-            subtitle_drivers.add(SubtitlesASS(video_id))
+        if format in ("ass","ssa"):
+            subtitle_drivers.add(SubtitlesASS(video_id, format))
 
     for comment in Messages(video_id):
         [driver.add(comment) for driver in subtitle_drivers]
