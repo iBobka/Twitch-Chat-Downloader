@@ -5,14 +5,8 @@ Neat python script to download chat messages from past broadcasts
 ## Requirements
 
 * [Python 2.7 or 3.4+](https://www.python.org/downloads/)
+* [pip](https://pip.pypa.io/en/stable/installing/)
 * [python-requests](http://docs.python-requests.org/en/master/user/install/)
-
-### Install requirements automatically
-
-```
-sudo apt-get install python-pip
-sudo pip install -r requirements.txt
-```
 
 ## Installation
 
