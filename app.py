@@ -56,9 +56,9 @@ class Messages(list):
         for comment in response["comments"]:
             self.append(comment)
 
-        self.cursor = response["_next"]
-
-        if self.cursor is None or len(self) == 0:
+        if '_next' in response:
+            self.cursor = response['_next']
+        else:
             self.stop = True
 
     def next(self):
