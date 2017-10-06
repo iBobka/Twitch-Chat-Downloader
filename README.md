@@ -40,6 +40,7 @@ To override default options, copy `example.config.json` into `example.json` and 
 | Format | Description |
 | ------ | ----------- |
 | `ass` or `ssa` | Advanced SubStation Alpha |
+| `srt` | SubRip |
 
 ## Notes
 
