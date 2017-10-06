@@ -109,18 +109,20 @@ class SubtitlesASS(Subtitle):
             '\n',
             '[V4 Styles]\n',
             settings['ssa_style_format'],
+            '\n',
             settings['ssa_style_default'],
             '\n\n',
             '[Events]\n',
-            settings['ssa_events_format']
+            settings['ssa_events_format'],
+            '\n'
         ])
 
     def add(self, comment):
-        time_offset = comment['content_offset_seconds']
+        offset = comment['content_offset_seconds']
 
         self.file.write(settings['ssa_events_line_format'].format(
-            start=self._offset_str(time_offset),
-            end=self._offset_str(time_offset + settings['subtitle_duration']),
+            start=self._offset_str(offset)[:-4],
+            end=self._offset_str(offset + settings['subtitle_duration'])[:-4],
             user=comment['commenter']['display_name'],
             message=comment['message']['body']
         ).encode('utf-8') + '\n')
