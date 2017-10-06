@@ -49,7 +49,7 @@ class Messages(list):
             url = self.base_url + "?cursor=" + self.cursor
 
         if settings['cooldown'] > 0:
-            time.sleep(settings['cooldown'])
+            time.sleep(settings['cooldown'] / 1000)
 
         response = self.client.get(url).json()
 
