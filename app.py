@@ -20,7 +20,8 @@ with open(settings_file, 'r') as settings_file:
 
 # Check for outdated settings.json
 if settings['version'].startswith("1"):
-    print("Please update your settings.json (see example.settings.json for examples)")
+    print("Please update your settings.json " +
+          "(see example.settings.json for examples)")
     sys.exit(1)
 
 # Create destination directory
@@ -31,7 +32,8 @@ if not os.path.exists(settings['directory']):
 class Messages(list):
     def __init__(self, video_id):
         self.video_id = video_id
-        self.base_url = "https://api.twitch.tv/v5/videos/%d/comments" % video_id
+        api_url = "https://api.twitch.tv/v5/videos/{id}/comments"
+        self.base_url = api_url.format(id=video_id)
 
         self.client = requests.Session()
         self.client.headers["Acccept"] = "application/vnd.twitchtv.v5+json"
@@ -66,9 +68,10 @@ class Messages(list):
             if self.stop is True:
                 raise StopIteration
             else:
-                self._load_more();
+                self._load_more()
 
         return self.pop(0)
+
 
 class Subtitle(object):
     @staticmethod
@@ -84,7 +87,7 @@ class Subtitle(object):
         self.file = self.new_file(video_id, format)
 
     @staticmethod
-    def _offset_str(seconds, decimal_separator='.'):
+    def _offset(seconds, decimal_separator='.'):
         offset = str(datetime.timedelta(seconds=seconds))
         if '.' not in offset:
             offset += '.000000'
@@ -97,6 +100,7 @@ class Subtitle(object):
     def close(self):
         self.file.flush()
         self.file.close()
+
 
 class SubtitlesASS(Subtitle):
     def __init__(self, video_id, format="ass"):
@@ -121,11 +125,12 @@ class SubtitlesASS(Subtitle):
         offset = comment['content_offset_seconds']
 
         self.file.write(settings['ssa_events_line_format'].format(
-            start=self._offset_str(offset)[:-4],
-            end=self._offset_str(offset + settings['subtitle_duration'])[:-4],
+            start=self._offset(offset)[:-4],
+            end=self._offset(offset + settings['subtitle_duration'])[:-4],
             user=comment['commenter']['display_name'],
             message=comment['message']['body']
         ).encode('utf-8') + '\n')
+
 
 class SubtitlesSRT(Subtitle):
     def __init__(self, video_id):
@@ -133,12 +138,12 @@ class SubtitlesSRT(Subtitle):
         self.count = 0
 
     def add(self, comment):
-        offset = comment['content_offset_seconds']
+        time = comment['content_offset_seconds']
 
         self.file.write(str(self.count) + '\n')
         self.file.write("{start} --> {end}\n".format(
-            start=self._offset_str(offset, ',')[:-3],
-            end=self._offset_str(offset + settings['subtitle_duration'], ',')[:-3]
+            start=self._offset(time, ',')[:-3],
+            end=self._offset(time + settings['subtitle_duration'], ',')[:-3]
         ))
         self.file.write("{user}: {message}\n\n".format(
             user=comment['commenter']['display_name'].encode('utf-8'),
@@ -146,6 +151,7 @@ class SubtitlesSRT(Subtitle):
         ))
 
         self.count += 1
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -156,7 +162,7 @@ if __name__ == "__main__":
 
     subtitle_drivers = set()
     for format in settings['formats']:
-        if format in ("ass","ssa"):
+        if format in ("ass", "ssa"):
             subtitle_drivers.add(SubtitlesASS(video_id, format))
 
         if format == "srt":
