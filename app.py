@@ -63,7 +63,7 @@ class Messages(list):
         else:
             self.stop = True
 
-    def next(self):
+    def __next__(self):
         if len(self) == 0:
             if self.stop is True:
                 raise StopIteration
@@ -72,8 +72,17 @@ class Messages(list):
 
         return self.pop(0)
 
+    next = __next__  # Python 2.x compatibility
+
 
 class Subtitle(object):
+    @staticmethod
+    def encode(input):
+        if sys.version_info > (3, 0):
+            return input
+        else:
+            return input.encode('utf-8')
+
     @staticmethod
     def new_file(video_id, format):
         filename = settings['filename_format'].format(
@@ -106,6 +115,8 @@ class SubtitlesASS(Subtitle):
     def __init__(self, video_id, format="ass"):
         super(SubtitlesASS, self).__init__(video_id, format)
 
+        self.line = self.encode(settings['ssa_events_line_format']) + '\n'
+
         self.file.writelines([
             '[Script Info]\n',
             'PlayResX: 1280\n',
@@ -124,12 +135,12 @@ class SubtitlesASS(Subtitle):
     def add(self, comment):
         offset = comment['content_offset_seconds']
 
-        self.file.write(settings['ssa_events_line_format'].format(
+        self.file.write(self.line.format(
             start=self._offset(offset)[:-4],
             end=self._offset(offset + settings['subtitle_duration'])[:-4],
-            user=comment['commenter']['display_name'],
-            message=comment['message']['body']
-        ).encode('utf-8') + '\n')
+            user=self.encode(comment['commenter']['display_name']),
+            message=self.encode(comment['message']['body'])
+        ))
 
 
 class SubtitlesSRT(Subtitle):
@@ -146,8 +157,8 @@ class SubtitlesSRT(Subtitle):
             end=self._offset(time + settings['subtitle_duration'], ',')[:-3]
         ))
         self.file.write("{user}: {message}\n\n".format(
-            user=comment['commenter']['display_name'].encode('utf-8'),
-            message=comment['message']['body'].encode('utf-8')
+            user=self.encode(comment['commenter']['display_name']),
+            message=self.encode(comment['message']['body'])
         ))
 
         self.count += 1
