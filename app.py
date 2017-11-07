@@ -90,7 +90,7 @@ class Subtitle(object):
             video_id=video_id,
             format=format
         )
-        return open(filename, mode='w+')
+        return open(filename, mode='w+', encoding='UTF8')
 
     def __init__(self, video_id, format):
         self.file = self.new_file(video_id, format)
