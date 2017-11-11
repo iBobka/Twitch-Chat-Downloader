@@ -90,7 +90,10 @@ class Subtitle(object):
             video_id=video_id,
             format=format
         )
-        return open(filename, mode='w+', encoding='UTF8')
+        if sys.version_info > (3, 0):
+            return open(filename, mode='w+', encoding='UTF8')
+        else:
+            return open(filename, mode='w+')
 
     def __init__(self, video_id, format):
         self.file = self.new_file(video_id, format)
