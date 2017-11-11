@@ -24,7 +24,7 @@ python app.py <video_id>
 
 ## Settings
 
-To override default options, copy `example.config.json` into `example.json` and change it.
+To override default options, copy `example.settings.json` into `settings.json` and change it.
 
 | Option | Value | Description |
 | ------ | ------ | ----------- |
