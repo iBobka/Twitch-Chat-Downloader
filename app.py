@@ -167,6 +167,20 @@ class SubtitlesSRT(Subtitle):
         self.count += 1
 
 
+class SubtitlesIRC(Subtitle):
+    def __init__(self, video_id):
+        super(SubtitlesIRC, self).__init__(video_id, "irc")
+
+    def add(self, comment):
+        time = comment['content_offset_seconds']
+
+        self.file.write("[{start}] <{user}> {message}\n".format(
+            start=self._offset(time, ',')[:-3],
+            user=self.encode(comment['commenter']['name']),
+            message=self.encode(comment['message']['body'])
+        ))
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("Usage: " + sys.argv[0] + " <video_id>")
@@ -181,6 +195,9 @@ if __name__ == "__main__":
 
         if format == "srt":
             subtitle_drivers.add(SubtitlesSRT(video_id))
+
+        if format == "irc":
+            subtitle_drivers.add(SubtitlesIRC(video_id))
 
     for comment in Messages(video_id):
         [driver.add(comment) for driver in subtitle_drivers]
