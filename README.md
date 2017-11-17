@@ -41,6 +41,7 @@ To override default options, copy `example.settings.json` into `settings.json` a
 | ------ | ----------- |
 | `ass` or `ssa` | Advanced SubStation Alpha |
 | `srt` | SubRip |
+| `irc` | IRC-style log |
 
 ## Notes
 
