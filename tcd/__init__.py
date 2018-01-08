@@ -184,13 +184,7 @@ class SubtitlesIRC(Subtitle):
         ))
 
 
-def main():
-    if len(sys.argv) == 1:
-        print("Usage: " + sys.argv[0] + " <video_id>")
-        sys.exit(1)
-
-    video_id = int(sys.argv[1])
-
+def download(video_id):
     subtitle_drivers = set()
     for format in settings['formats']:
         if format in ("ass", "ssa"):
@@ -206,6 +200,15 @@ def main():
         [driver.add(comment) for driver in subtitle_drivers]
 
     [driver.close() for driver in subtitle_drivers]
+
+
+def main():
+    if len(sys.argv) == 1:
+        print("Usage: " + sys.argv[0] + " <video_id>")
+        sys.exit(1)
+
+    video_id = int(sys.argv[1])
+    download(video_id)
 
 
 if __name__ == "__main__":
