@@ -8,17 +8,27 @@ Neat python script to download chat messages from past broadcasts
 * [pip](https://pip.pypa.io/en/stable/installing/)
 * [python-requests](http://docs.python-requests.org/en/master/user/install/)
 
-## Installation
+## Installation and usage
+
+There are multiple ways to install this script.
 
 ```bash
+# Install package with pip
+pip install https://github.com/TheDrHax/Twitch-Chat-Downloader/archive/master.zip
+python -m tcd <video_id>
+```
+
+```bash
+# Run pip as root to install `tcd` for all users
+sudo pip install https://github.com/TheDrHax/Twitch-Chat-Downloader/archive/master.zip
+tcd <video_id>
+```
+
+```bash
+# Start script directly from cloned repository
 git clone https://github.com/TheDrHax/Twitch-Chat-Downloader.git
 cd Twitch-Chat-Downloader
 pip install -r requirements.txt
-```
-
-## Usage
-
-```bash
 python app.py <video_id>
 ```
 
