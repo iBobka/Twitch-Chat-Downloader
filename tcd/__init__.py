@@ -138,13 +138,27 @@ class SubtitlesASS(Subtitle):
             '\n'
         ])
 
+    @staticmethod
+    def _get_color_bgr(message):
+        color = 'FFFFFF'
+        if message.get('user_color'):
+            color = message['user_color'].replace('#', '')
+        return color[4:6] + color[2:4] + color[0:2]  # RGB -> BGR
+
+    @staticmethod
+    def _color(text, color):
+        return '{\\c&H' + color + '&}' + text + '{\\c&HFFFFFF&}'
+
     def add(self, comment):
         offset = comment['content_offset_seconds']
+        color = self._get_color_bgr(comment['message'])
+
+        username = self._color(comment['commenter']['display_name'], color)
 
         self.file.write(self.line.format(
             start=self._offset(offset)[:-4],
             end=self._offset(offset + settings['subtitle_duration'])[:-4],
-            user=self.encode(comment['commenter']['display_name']),
+            user=self.encode(username),
             message=self.encode(comment['message']['body'])
         ))
 
