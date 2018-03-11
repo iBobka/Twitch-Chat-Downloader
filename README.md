@@ -40,6 +40,7 @@ To override default options, copy `example.settings.json` into `settings.json` a
 | ------ | ------ | ----------- |
 | client_id | *String* | Twitch API client_id. |
 | cooldown | *Integer* | Delay (in milliseconds) between API calls. |
+| display_progress | *Boolean* | Display animated progress bar in terminal. |
 | formats | *String[]* | List of formats to download. See Formats table below. |
 | directory | *String* | Name of directory to save all generated files. |
 | filename_format | *String* | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |

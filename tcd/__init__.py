@@ -9,6 +9,7 @@ import datetime
 import inspect
 
 import requests
+from progressbar import ProgressBar
 
 SELF = inspect.getfile(inspect.currentframe())
 ROOT = os.path.dirname(os.path.abspath(SELF))
@@ -42,6 +43,15 @@ class Messages(list):
         self.client.headers["Acccept"] = "application/vnd.twitchtv.v5+json"
         self.client.headers["Client-ID"] = settings['client_id']
 
+        # Get video object from API
+        if settings.get('display_progress') in [None, True]:
+            api_video_url = 'https://api.twitch.tv/kraken/videos/{}'
+            video = self.client.get(api_video_url.format(video_id)).json()
+            self.duration = video['length']
+            self.progressbar = ProgressBar(max_value=self.duration)
+        else:
+            self.progressbar = None
+
     def __iter__(self):
         self.cursor = None
         self.stop = False
@@ -61,6 +71,10 @@ class Messages(list):
         for comment in response["comments"]:
             self.append(comment)
 
+        if self.progressbar and self.duration:
+            offset = response['comments'][-1]['content_offset_seconds']
+            self.progressbar.update(min(offset, self.duration))
+
         if '_next' in response:
             self.cursor = response['_next']
         else:
@@ -69,6 +83,8 @@ class Messages(list):
     def __next__(self):
         if len(self) == 0:
             if self.stop is True:
+                if self.progressbar:
+                    self.progressbar.finish()
                 raise StopIteration
             else:
                 self._load_more()
