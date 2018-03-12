@@ -10,7 +10,7 @@ setup(name='twitch-chat-downloader',
       license='MIT',
       url='https://github.com/TheDrHax/Twitch-Chat-Downloader',
 
-      install_requires=['requests'],
+      install_requires=['requests', 'progressbar2'],
 
       packages=find_packages(),
       package_data={'tcd': ['example.settings.json']},
