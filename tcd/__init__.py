@@ -9,6 +9,8 @@ import datetime
 import inspect
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3 import Retry
 from progressbar import ProgressBar
 
 SELF = inspect.getfile(inspect.currentframe())
@@ -42,6 +44,12 @@ class Messages(list):
         self.client = requests.Session()
         self.client.headers["Acccept"] = "application/vnd.twitchtv.v5+json"
         self.client.headers["Client-ID"] = settings['client_id']
+
+        # Configure retries for all requests
+        retries = Retry(connect=5, read=2, redirect=5)
+        http_adapter = HTTPAdapter(max_retries=retries)
+        self.client.mount("http://", http_adapter)
+        self.client.mount("https://", http_adapter)
 
         # Get video object from API
         if settings.get('display_progress') in [None, True]:
