@@ -36,7 +36,7 @@ python -m tcd <video_id>
 
 To override default options, copy `example.settings.json` into `settings.json` and change it.
 
-| Option | Value | Description |
+| Option | Type | Description |
 | ------ | ------ | ----------- |
 | client_id | *String* | Twitch API client_id. |
 | cooldown | *Integer* | Delay (in milliseconds) between API calls. |
@@ -45,6 +45,10 @@ To override default options, copy `example.settings.json` into `settings.json` a
 | directory | *String* | Name of directory to save all generated files. |
 | filename_format | *String* | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |
 | subtitle_duration | *Integer* | Duration (in seconds) of each line of subtitles. |
+| group_repeating_emotes | Object | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
+| group_repeating_emotes.enabled | *Boolean* | Enable or disable this function. |
+| group_repeating_emotes.threshold | *Integer* | Number of repeating emotes to trigger this function. |
+| group_repeating_emotes.format | *String* | Customize format of replaced emotes. |
 
 ## Formats
 

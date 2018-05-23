@@ -104,6 +104,28 @@ class Messages(list):
 
 class Subtitle(object):
     @staticmethod
+    def group(message):
+        prefs = settings.get('group_repeating_emotes')
+        if prefs is None or not prefs['enabled']:
+            return message
+
+        words = []
+        for word in message.split(' '):
+            if len(words) > 0 and words[-1][0] == word:
+                words[-1][1] += 1
+            else:
+                words.append([word, 1])
+
+        result = []
+        for word, count in words:
+            if count >= prefs['threshold']:
+                result.append(prefs['format'].format(emote=word, count=count))
+            else:
+                result += [word] * count
+
+        return ' '.join(result)
+
+    @staticmethod
     def encode(input):
         if sys.version_info > (3, 0):
             return input
@@ -183,7 +205,7 @@ class SubtitlesASS(Subtitle):
             start=self._offset(offset)[:-4],
             end=self._offset(offset + settings['subtitle_duration'])[:-4],
             user=self.encode(username),
-            message=self.encode(comment['message']['body'])
+            message=self.encode(self.group(comment['message']['body']))
         ))
 
 
@@ -202,7 +224,7 @@ class SubtitlesSRT(Subtitle):
         ))
         self.file.write("{user}: {message}\n\n".format(
             user=self.encode(comment['commenter']['display_name']),
-            message=self.encode(comment['message']['body'])
+            message=self.encode(self.group(comment['message']['body']))
         ))
 
         self.count += 1
@@ -218,7 +240,7 @@ class SubtitlesIRC(Subtitle):
         self.file.write("[{start}] <{user}> {message}\n".format(
             start=self._offset(time, ',')[:-3],
             user=self.encode(comment['commenter']['name']),
-            message=self.encode(comment['message']['body'])
+            message=self.encode(self.group(comment['message']['body']))
         ))
 
 
