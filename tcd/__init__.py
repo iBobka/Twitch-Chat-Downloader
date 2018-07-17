@@ -244,22 +244,32 @@ class SubtitlesIRC(Subtitle):
         ))
 
 
+class SubtitleWriter:
+    def __init__(self, video_id):
+        self.drivers = set()
+
+        for format in settings['formats']:
+            if format in ("ass", "ssa"):
+                self.drivers.add(SubtitlesASS(video_id, format))
+
+            if format == "srt":
+                self.drivers.add(SubtitlesSRT(video_id))
+
+            if format == "irc":
+                self.drivers.add(SubtitlesIRC(video_id))
+
+    def add(self, comment):
+        [driver.add(comment) for driver in self.drivers]
+
+    def close(self):
+        [driver.close() for driver in self.drivers]
+
+
 def download(video_id):
-    subtitle_drivers = set()
-    for format in settings['formats']:
-        if format in ("ass", "ssa"):
-            subtitle_drivers.add(SubtitlesASS(video_id, format))
-
-        if format == "srt":
-            subtitle_drivers.add(SubtitlesSRT(video_id))
-
-        if format == "irc":
-            subtitle_drivers.add(SubtitlesIRC(video_id))
-
+    writer = SubtitleWriter(video_id)
     for comment in Messages(video_id):
-        [driver.add(comment) for driver in subtitle_drivers]
-
-    [driver.close() for driver in subtitle_drivers]
+        writer.add(comment)
+    writer.close()
 
 
 def main():
