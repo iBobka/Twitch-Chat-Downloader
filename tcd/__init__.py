@@ -35,7 +35,7 @@ if not os.path.exists(settings['directory']):
     os.makedirs(settings['directory'])
 
 
-class Messages(list):
+class Messages(object):
     def __init__(self, video_id):
         self.video_id = video_id
         api_url = "https://api.twitch.tv/v5/videos/{id}/comments"
@@ -61,45 +61,27 @@ class Messages(list):
             self.progressbar = None
 
     def __iter__(self):
-        self.cursor = None
-        self.stop = False
-        return self
+        url = self.base_url + "?content_offset_seconds=0"
 
-    def _load_more(self):
-        if self.cursor is None:
-            url = self.base_url + "?content_offset_seconds=0"
-        else:
-            url = self.base_url + "?cursor=" + self.cursor
+        while True:
+            response = self.client.get(url).json()
 
-        if settings['cooldown'] > 0:
-            time.sleep(settings['cooldown'] / 1000)
+            for comment in response["comments"]:
+                yield comment
 
-        response = self.client.get(url).json()
+            if self.progressbar and self.duration:
+                offset = response['comments'][-1]['content_offset_seconds']
+                self.progressbar.update(min(offset, self.duration))
 
-        for comment in response["comments"]:
-            self.append(comment)
-
-        if self.progressbar and self.duration:
-            offset = response['comments'][-1]['content_offset_seconds']
-            self.progressbar.update(min(offset, self.duration))
-
-        if '_next' in response:
-            self.cursor = response['_next']
-        else:
-            self.stop = True
-
-    def __next__(self):
-        if len(self) == 0:
-            if self.stop is True:
+            if '_next' not in response:
                 if self.progressbar:
                     self.progressbar.finish()
-                raise StopIteration
-            else:
-                self._load_more()
+                break
 
-        return self.pop(0)
+            url = self.base_url + "?cursor=" + response['_next']
 
-    next = __next__  # Python 2.x compatibility
+            if settings['cooldown'] > 0:
+                time.sleep(settings['cooldown'] / 1000)
 
 
 class Subtitle(object):
