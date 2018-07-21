@@ -62,7 +62,7 @@ class Messages(object):
 
         # Get video object from API
         if settings.get('display_progress') in [None, True]:
-            api_video_url = 'https://api.twitch.tv/kraken/videos/{}'
+            api_video_url = 'https://api.twitch.tv/v5/videos/{}'
             video = self.client.get(api_video_url.format(video_id)).json()
             self.duration = video['length']
             self.progressbar = ProgressBar(max_value=self.duration)

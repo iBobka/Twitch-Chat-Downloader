@@ -64,5 +64,5 @@ To override default options, copy `example.settings.json` into `settings.json` a
 ## Notes
 
 - Empty messages means the user has been timed out. There's no known way to get these.
-- This script is using Twitch's API v5 that will be [removed](https://dev.twitch.tv/docs/v5) at the end of 2018.
+- This script is using Twitch's API v5 that is [deprecated](https://dev.twitch.tv/docs/v5).
 - Consider increasing the delay between API calls in `settings.json` to avoid a potential temporary block from Twitch for sending too many requests when downloading messages from very long streams.
