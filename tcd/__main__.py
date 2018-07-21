@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import tcd
+from . import main
 
-if __name__ == "__main__":
-    tcd.main()
+if __name__ == '__main__':
+    main()
