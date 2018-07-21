@@ -11,28 +11,6 @@ from .settings import settings
 
 class Subtitle(object):
     @staticmethod
-    def group(message):
-        prefs = settings.get('group_repeating_emotes')
-        if prefs is None or not prefs['enabled']:
-            return message
-
-        words = []
-        for word in message.split(' '):
-            if len(words) > 0 and words[-1][0] == word:
-                words[-1][1] += 1
-            else:
-                words.append([word, 1])
-
-        result = []
-        for word, count in words:
-            if count >= prefs['threshold']:
-                result.append(prefs['format'].format(emote=word, count=count))
-            else:
-                result += [word] * count
-
-        return ' '.join(result)
-
-    @staticmethod
     def encode(input):
         if sys.version_info > (3, 0):
             return input
@@ -96,27 +74,22 @@ class SubtitlesASS(Subtitle):
         ])
 
     @staticmethod
-    def _get_color_bgr(message):
-        color = 'FFFFFF'
-        if message.get('user_color'):
-            color = message['user_color'].replace('#', '')
-        return color[4:6] + color[2:4] + color[0:2]  # RGB -> BGR
+    def _rgb_to_bgr(color):
+        return color[4:6] + color[2:4] + color[0:2]
 
     @staticmethod
     def _color(text, color):
         return '{\\c&H' + color + '&}' + text + '{\\c&HFFFFFF&}'
 
     def add(self, comment):
-        offset = comment['content_offset_seconds']
-        color = self._get_color_bgr(comment['message'])
-
-        username = self._color(comment['commenter']['display_name'], color)
+        offset = comment.offset
+        color = self._rgb_to_bgr(comment.color)
 
         self.file.write(self.line.format(
             start=self._offset(offset)[:-4],
             end=self._offset(offset + settings['subtitle_duration'])[:-4],
-            user=self.encode(username),
-            message=self.encode(self.group(comment['message']['body']))
+            user=self.encode(self._color(comment.user, color)),
+            message=self.encode(comment.message)
         ))
 
 
@@ -126,7 +99,7 @@ class SubtitlesSRT(Subtitle):
         self.count = 0
 
     def add(self, comment):
-        time = comment['content_offset_seconds']
+        time = comment.offset
 
         self.file.write(str(self.count) + '\n')
         self.file.write("{start} --> {end}\n".format(
@@ -134,8 +107,8 @@ class SubtitlesSRT(Subtitle):
             end=self._offset(time + settings['subtitle_duration'], ',')[:-3]
         ))
         self.file.write("{user}: {message}\n\n".format(
-            user=self.encode(comment['commenter']['display_name']),
-            message=self.encode(self.group(comment['message']['body']))
+            user=self.encode(comment.user),
+            message=self.encode(comment.message)
         ))
 
         self.count += 1
@@ -146,12 +119,10 @@ class SubtitlesIRC(Subtitle):
         super(SubtitlesIRC, self).__init__(video_id, "irc")
 
     def add(self, comment):
-        time = comment['content_offset_seconds']
-
         self.file.write("[{start}] <{user}> {message}\n".format(
-            start=self._offset(time, ',')[:-3],
-            user=self.encode(comment['commenter']['name']),
-            message=self.encode(self.group(comment['message']['body']))
+            start=self._offset(comment.offset, ',')[:-3],
+            user=self.encode(comment.user),
+            message=self.encode(comment.message)
         ))
 
 

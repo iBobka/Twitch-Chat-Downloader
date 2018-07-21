@@ -10,6 +10,40 @@ from requests.packages.urllib3 import Retry
 from .settings import settings
 
 
+class Message(object):
+    @staticmethod
+    def group(message):
+        prefs = settings.get('group_repeating_emotes')
+        if prefs is None or not prefs['enabled']:
+            return message
+
+        words = []
+        for word in message.split(' '):
+            if len(words) > 0 and words[-1][0] == word:
+                words[-1][1] += 1
+            else:
+                words.append([word, 1])
+
+        result = []
+        for word, count in words:
+            if count >= prefs['threshold']:
+                result.append(prefs['format'].format(emote=word, count=count))
+            else:
+                result += [word] * count
+
+        return ' '.join(result)
+
+    def __init__(self, comment):
+        self.user = comment['commenter']['display_name']
+        self.message = self.group(comment['message']['body'])
+        self.offset = comment['content_offset_seconds']
+
+        if 'user_color' in comment['message']:
+            self.color = comment['message']['user_color'][1:]
+        else:
+            self.color = 'FFFFFF'
+
+
 class Messages(object):
     def __init__(self, video_id):
         self.video_id = video_id
@@ -42,7 +76,7 @@ class Messages(object):
             response = self.client.get(url).json()
 
             for comment in response["comments"]:
-                yield comment
+                yield Message(comment)
 
             if self.progressbar and self.duration:
                 offset = response['comments'][-1]['content_offset_seconds']
