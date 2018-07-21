@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
+import io
 import os
-import sys
 
 from datetime import timedelta
 
@@ -10,13 +12,6 @@ from .settings import settings
 
 
 class Subtitle(object):
-    @staticmethod
-    def encode(input):
-        if sys.version_info > (3, 0):
-            return input
-        else:
-            return input.encode('utf-8')
-
     @staticmethod
     def new_file(video_id, format):
         if not os.path.exists(settings['directory']):
@@ -28,10 +23,7 @@ class Subtitle(object):
             format=format
         )
 
-        if sys.version_info > (3, 0):
-            return open(filename, mode='w+', encoding='UTF8')
-        else:
-            return open(filename, mode='w+')
+        return io.open(filename, mode='w+', encoding='UTF8')
 
     def __init__(self, video_id, format):
         self.file = self.new_file(video_id, format)
@@ -56,7 +48,7 @@ class SubtitlesASS(Subtitle):
     def __init__(self, video_id, format="ass"):
         super(SubtitlesASS, self).__init__(video_id, format)
 
-        self.line = self.encode(settings['ssa_events_line_format']) + '\n'
+        self.line = settings['ssa_events_line_format'] + '\n'
 
         self.file.writelines([
             '[Script Info]\n',
@@ -88,8 +80,8 @@ class SubtitlesASS(Subtitle):
         self.file.write(self.line.format(
             start=self._offset(offset)[:-4],
             end=self._offset(offset + settings['subtitle_duration'])[:-4],
-            user=self.encode(self._color(comment.user, color)),
-            message=self.encode(comment.message)
+            user=self._color(comment.user, color),
+            message=comment.message
         ))
 
 
@@ -107,8 +99,8 @@ class SubtitlesSRT(Subtitle):
             end=self._offset(time + settings['subtitle_duration'], ',')[:-3]
         ))
         self.file.write("{user}: {message}\n\n".format(
-            user=self.encode(comment.user),
-            message=self.encode(comment.message)
+            user=comment.user,
+            message=comment.message
         ))
 
         self.count += 1
@@ -121,8 +113,8 @@ class SubtitlesIRC(Subtitle):
     def add(self, comment):
         self.file.write("[{start}] <{user}> {message}\n".format(
             start=self._offset(comment.offset, ',')[:-3],
-            user=self.encode(comment.user),
-            message=self.encode(comment.message)
+            user=comment.user,
+            message=comment.message
         ))
 
 
