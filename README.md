@@ -29,7 +29,10 @@ tcd <video_id>
 git clone https://github.com/TheDrHax/Twitch-Chat-Downloader.git
 cd Twitch-Chat-Downloader
 pip install -r requirements.txt
+
 python -m tcd <video_id>
+# or ...
+python app.py <video_id>
 ```
 
 ## Settings
