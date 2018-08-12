@@ -10,6 +10,17 @@ from requests.packages.urllib3 import Retry
 from .settings import settings
 
 
+client = Session()
+client.headers["Acccept"] = "application/vnd.twitchtv.v5+json"
+client.headers["Client-ID"] = settings['client_id']
+
+# Configure retries for all requests
+retries = Retry(connect=5, read=2, redirect=5)
+http_adapter = HTTPAdapter(max_retries=retries)
+client.mount("http://", http_adapter)
+client.mount("https://", http_adapter)
+
+
 class Message(object):
     @staticmethod
     def group(message):
@@ -50,20 +61,10 @@ class Messages(object):
         api_url = "https://api.twitch.tv/v5/videos/{id}/comments"
         self.base_url = api_url.format(id=video_id)
 
-        self.client = Session()
-        self.client.headers["Acccept"] = "application/vnd.twitchtv.v5+json"
-        self.client.headers["Client-ID"] = settings['client_id']
-
-        # Configure retries for all requests
-        retries = Retry(connect=5, read=2, redirect=5)
-        http_adapter = HTTPAdapter(max_retries=retries)
-        self.client.mount("http://", http_adapter)
-        self.client.mount("https://", http_adapter)
-
         # Get video object from API
         if settings.get('display_progress') in [None, True]:
             api_video_url = 'https://api.twitch.tv/v5/videos/{}'
-            video = self.client.get(api_video_url.format(video_id)).json()
+            video = client.get(api_video_url.format(video_id)).json()
             self.duration = video['length']
             self.progressbar = ProgressBar(max_value=self.duration)
         else:
@@ -73,7 +74,7 @@ class Messages(object):
         url = self.base_url + "?content_offset_seconds=0"
 
         while True:
-            response = self.client.get(url).json()
+            response = client.get(url).json()
 
             for comment in response["comments"]:
                 yield Message(comment)
@@ -91,3 +92,24 @@ class Messages(object):
 
             if settings['cooldown'] > 0:
                 sleep(settings['cooldown'] / 1000)
+
+
+class Channel(object):
+    def __init__(self, channel):
+        self.name = channel
+        api_url = "https://api.twitch.tv/kraken/channels/{}"
+        self.base_url = api_url.format(channel)
+
+    def videos(self, offset=0):
+        url = self.base_url + '/videos?limit=100'
+        url += '&broadcast_type=archive'  # TODO: Other types?
+        url += '&offset={}'.format(offset)
+
+        r = client.get(url).json()
+
+        for video in r['videos']:
+            yield int(video['_id'][1:])
+
+        if r['_total'] > 100 + offset:
+            for video in self.videos(offset=(offset+100)):
+                yield video
