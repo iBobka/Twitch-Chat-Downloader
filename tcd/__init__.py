@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-
+from argparse import ArgumentParser
 from .twitch import Messages
 from .subtitles import SubtitleWriter
+
+
+parser = ArgumentParser(description='Download VOD chats from Twitch.')
+parser.add_argument('video', type=int, nargs='?',
+                    help='ID of VOD (twitch.tv/videos/{video})')
 
 
 def download(video_id):
@@ -15,12 +19,10 @@ def download(video_id):
 
 
 def main():
-    if len(sys.argv) == 1:
-        print("Usage: " + sys.argv[0] + " <video_id>")
-        sys.exit(1)
+    args = parser.parse_args()
 
-    video_id = int(sys.argv[1])
-    download(video_id)
+    if args.video:
+        download(args.video)
 
 
 if __name__ == "__main__":
