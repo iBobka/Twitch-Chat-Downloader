@@ -1,9 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import json
+
 from .twitch import Messages, Channel
 from .subtitles import SubtitleWriter
-from .settings import argparser
+from .settings import argparser, settings
+
+
+def generate_config():
+    with open('settings.json', 'w') as f:
+        f.write(json.dumps(settings, indent=2))
 
 
 def download(video):
@@ -36,6 +43,10 @@ def main():
     elif args.channel:
         download_all(args.channel, args.video_min,
                      args.video_max, args.video_count)
+    elif args.generate_config:
+        generate_config()
+        print('New config had been written to ./settings.json '
+              'and now will be used by default.')
 
 
 if __name__ == "__main__":

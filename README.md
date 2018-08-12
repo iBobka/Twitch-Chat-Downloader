@@ -37,7 +37,7 @@ python app.py <video_id>
 
 ## Settings
 
-To override default options, copy `example.settings.json` into `settings.json` or use console arguments listed below.
+To override default options, run `python -m tcd --generate-config` and edit generated `settings.json` or just use console arguments listed below.
 
 | Option | Type | Argument | Description |
 | ------ | ---- | -------- | ----------- |

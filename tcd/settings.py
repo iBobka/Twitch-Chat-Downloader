@@ -144,6 +144,10 @@ exclusive_group.add_argument(
 exclusive_group.add_argument(
     'video_id', type=int, metavar='VIDEO_ID', nargs='?',
     help='Alias for -v/--video (for backward compatibility).')
+exclusive_group.add_argument(
+    '--generate-config', action='store_true',
+    help=('Generate settings.json in current directory using defaults and '
+          'command-line arguments.'))
 
 channel_group = argparser.add_argument_group(
     'Channel Mode Settings',
