@@ -49,9 +49,9 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | filename_format | *str* | `--filename-format` | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |
 | subtitle_duration | *int* | `--subtitle-duration` | Duration (in seconds) of each line of subtitles. |
 | group_repeating_emotes | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
-| —.enabled | *bool* |  | Enable or disable this function. |
-| —.threshold | *int* |  | Number of repeating emotes to trigger this function. |
-| —.format | *str* |  | Customize format of replaced emotes. |
+| —.enabled | *bool* | `--[no-]group` | Enable or disable this function. |
+| —.threshold | *int* | `--group-threshold` | Number of repeating emotes to trigger this function. |
+| —.format | *str* | `--group-format` | Customize format of replaced emotes. |
 
 ## Formats
 
