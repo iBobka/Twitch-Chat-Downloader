@@ -37,21 +37,21 @@ python app.py <video_id>
 
 ## Settings
 
-To override default options, copy `example.settings.json` into `settings.json` and change it.
+To override default options, copy `example.settings.json` into `settings.json` or use console arguments listed below.
 
-| Option | Type | Description |
-| ------ | ------ | ----------- |
-| client_id | *String* | Twitch API client_id. |
-| cooldown | *Integer* | Delay (in milliseconds) between API calls. |
-| display_progress | *Boolean* | Display animated progress bar in terminal. |
-| formats | *String[]* | List of formats to download. See Formats table below. |
-| directory | *String* | Name of directory to save all generated files. |
-| filename_format | *String* | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |
-| subtitle_duration | *Integer* | Duration (in seconds) of each line of subtitles. |
-| group_repeating_emotes | Object | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
-| group_repeating_emotes.enabled | *Boolean* | Enable or disable this function. |
-| group_repeating_emotes.threshold | *Integer* | Number of repeating emotes to trigger this function. |
-| group_repeating_emotes.format | *String* | Customize format of replaced emotes. |
+| Option | Type | Argument | Description |
+| ------ | ---- | -------- | ----------- |
+| client_id | *str* | `--client-id` | Twitch API Client-ID header. |
+| cooldown | *int* | `--cooldown` | Delay (in milliseconds) between API calls. |
+| display_progress | *bool* | `--[no-]progress` | Display animated progress bar in terminal. |
+| formats | *str[]* | `-f/--formats` | List of formats to download. See Formats table below. |
+| directory | *str* | `-t`/`--directory` | Name of directory to save all generated files. |
+| filename_format | *str* | `--filename-format` | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |
+| subtitle_duration | *int* | `--subtitle-duration` | Duration (in seconds) of each line of subtitles. |
+| group_repeating_emotes | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
+| —.enabled | *bool* |  | Enable or disable this function. |
+| —.threshold | *int* |  | Number of repeating emotes to trigger this function. |
+| —.format | *str* |  | Customize format of replaced emotes. |
 
 ## Formats
 
