@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(name='twitch-chat-downloader',
-      version='2.1.1',
+      version='2.2',
 
       author='Dmitry Karikh',
       author_email='the.dr.hax@gmail.com',
