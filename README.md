@@ -52,6 +52,7 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | —.enabled | *bool* | `--[no-]group` | Enable or disable this function. |
 | —.threshold | *int* | `--group-threshold` | Number of repeating emotes to trigger this function. |
 | —.format | *str* | `--group-format` | Customize format of replaced emotes. |
+| video_types | *str* | `--video-types` | Comma-separated list of VOD types to detect in Channel Mode. (see [broadcast_type](https://dev.twitch.tv/docs/v5/reference/channels/#get-channel-videos)) |
 
 ## Formats
 

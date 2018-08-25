@@ -102,7 +102,7 @@ class Channel(object):
 
     def videos(self, offset=0):
         url = self.base_url + '/videos?limit=100'
-        url += '&broadcast_type=archive'  # TODO: Other types?
+        url += '&broadcast_type=' + settings['video_types']
         url += '&offset={}'.format(offset)
 
         r = client.get(url).json()

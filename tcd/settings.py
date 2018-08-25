@@ -43,7 +43,8 @@ if 'group_repeating_emotes' not in settings:
     settings['group_repeating_emotes'] = {'enabled': False,
                                           'threshold': 3,
                                           'format': '{emote} x{count}'}
-
+if 'video_types' not in settings:
+    settings['video_types'] = 'archive'
 
 #
 # Post-init settings overrides
@@ -110,6 +111,23 @@ def _post_init_parser(help=False):
         help=('Python str.format for grouped emotes. Available '
               'variables: {emote} and {count}.'))
 
+    channel_group = parser.add_argument_group(
+        'Channel Mode Settings',
+        'These options will only work with -c/--channel.')
+    channel_group.add_argument(
+        '--video-min', metavar='ID', type=int, default=0,
+        help='ID of the earliest VOD to download.')
+    channel_group.add_argument(
+        '--video-max', metavar='ID', type=int, default=None,
+        help='ID of the latest VOD to download.')
+    channel_group.add_argument(
+        '--video-count', metavar='N', type=int, default=None,
+        help='Download N the most recent VODs.')
+    channel_group.add_argument(
+        '--video-types', metavar='type1,type2', type=str, default='archive',
+        help=('Comma-separated list of VOD type to download. '
+              'Available types: archive, upload, highlight, past_premiere.'))
+
     return parser
 
 
@@ -124,6 +142,7 @@ settings['subtitle_duration'] = args.subtitle_duration
 settings['group_repeating_emotes']['enabled'] = args.group
 settings['group_repeating_emotes']['threshold'] = args.group_threshold
 settings['group_repeating_emotes']['format'] = args.group_format
+settings['video_types'] = args.video_types
 
 
 #
@@ -148,16 +167,3 @@ exclusive_group.add_argument(
     '--generate-config', action='store_true',
     help=('Generate settings.json in current directory using defaults and '
           'command-line arguments.'))
-
-channel_group = argparser.add_argument_group(
-    'Channel Mode Settings',
-    'These options will only work with -c/--channel.')
-channel_group.add_argument(
-    '--video-min', metavar='ID', type=int, default=0,
-    help='ID of the earliest VOD to download.')
-channel_group.add_argument(
-    '--video-max', metavar='ID', type=int, default=None,
-    help='ID of the latest VOD to download.')
-channel_group.add_argument(
-    '--video-count', metavar='N', type=int, default=None,
-    help='Download N the most recent VODs.')
