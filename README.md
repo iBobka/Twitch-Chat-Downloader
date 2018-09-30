@@ -48,6 +48,10 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | directory | *str* | `-t`/`--directory` | Name of directory to save all generated files. |
 | filename_format | *str* | `--filename-format` | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |
 | subtitle_duration | *int* | `--subtitle-duration` | Duration (in seconds) of each line of subtitles. |
+| dynamic_duration | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
+| —.enabled | *bool* | `--[no-]dynamic-duration` | Increase subtitle duration based on message length. |
+| —.max | *int* | `--dynamic-duration-max` | Maximum duration of subtitle message. |
+| —.max_length | *int* | `--dynamic-duration-max-length` | Maximum length of subtitle message. |
 | group_repeating_emotes | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
 | —.enabled | *bool* | `--[no-]group` | Enable or disable this function. |
 | —.threshold | *int* | `--group-threshold` | Number of repeating emotes to trigger this function. |

@@ -29,6 +29,18 @@ class Subtitle(object):
         self.file = self.new_file(video_id, format)
 
     @staticmethod
+    def _duration(msg):
+        T_MIN = settings['subtitle_duration']
+        T_MAX = settings['dynamic_duration']['max']
+        MSG_MAX = settings['dynamic_duration']['max_length']
+
+        if settings['dynamic_duration']['enabled']:
+            part = (MSG_MAX - min(len(msg), MSG_MAX)) / MSG_MAX
+            return T_MAX - (T_MAX - T_MIN) * part
+        else:
+            return T_MIN
+
+    @staticmethod
     def _offset(seconds, decimal_separator='.'):
         offset = str(timedelta(seconds=seconds))
         if '.' not in offset:
@@ -79,7 +91,7 @@ class SubtitlesASS(Subtitle):
 
         self.file.write(self.line.format(
             start=self._offset(offset)[:-4],
-            end=self._offset(offset + settings['subtitle_duration'])[:-4],
+            end=self._offset(offset + self._duration(comment.message))[:-4],
             user=self._color(comment.user, color),
             message=comment.message
         ))
@@ -96,7 +108,7 @@ class SubtitlesSRT(Subtitle):
         self.file.write(str(self.count) + '\n')
         self.file.write("{start} --> {end}\n".format(
             start=self._offset(time, ',')[:-3],
-            end=self._offset(time + settings['subtitle_duration'], ',')[:-3]
+            end=self._offset(time + self._duration(comment.message), ',')[:-3]
         ))
         self.file.write("{user}: {message}\n\n".format(
             user=comment.user,

@@ -40,11 +40,13 @@ if settings['version'].startswith("1"):
     sys.exit(1)
 
 if 'group_repeating_emotes' not in settings:
-    settings['group_repeating_emotes'] = {'enabled': False,
-                                          'threshold': 3,
+    settings['group_repeating_emotes'] = {'enabled': False, 'threshold': 3,
                                           'format': '{emote} x{count}'}
 if 'video_types' not in settings:
     settings['video_types'] = 'archive'
+if 'dynamic_duration' not in settings:
+    settings['dynamic_duration'] = {'enabled': False, 'max': 5,
+                                    'max_length': 100}
 
 #
 # Post-init settings overrides
@@ -90,6 +92,21 @@ def _post_init_parser(help=False):
         default=settings['subtitle_duration'],
         help=('Time (in seconds) to display each comment on the screen. '
               'Will be ignored by some subtitle formats (irc).'))
+    settings_group.add_argument(
+        '--dynamic-duration', action='store_true', dest='dynamic',
+        default=settings['dynamic_duration']['enabled'],
+        help='Increase subtitle duration based on message length.')
+    settings_group.add_argument(
+        '--no-dynamic-duration', action='store_false', dest='dynamic',
+        help='Opposite of --dynamic-duration.')
+    settings_group.add_argument(
+        '--dynamic-duration-max', metavar='sec', type=int,
+        default=settings['dynamic_duration']['max'],
+        help='Maximum duration of subtitle message.')
+    settings_group.add_argument(
+        '--dynamic-duration-max-length', metavar='chars', type=int,
+        default=settings['dynamic_duration']['max_length'],
+        help='Maximum length of subtitle message.')
 
     group = settings_group.add_mutually_exclusive_group(required=False)
     group.add_argument(
@@ -139,6 +156,9 @@ settings['formats'] = args.formats
 settings['directory'] = args.directory
 settings['filename_format'] = args.filename_format
 settings['subtitle_duration'] = args.subtitle_duration
+settings['dynamic_duration']['enabled'] = args.dynamic
+settings['dynamic_duration']['max'] = args.dynamic_duration_max
+settings['dynamic_duration']['max_length'] = args.dynamic_duration_max_length
 settings['group_repeating_emotes']['enabled'] = args.group
 settings['group_repeating_emotes']['threshold'] = args.group_threshold
 settings['group_repeating_emotes']['format'] = args.group_format
