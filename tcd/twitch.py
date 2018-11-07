@@ -77,7 +77,10 @@ class Messages(object):
             response = client.get(url).json()
 
             for comment in response["comments"]:
-                yield Message(comment)
+                try:
+                    yield Message(comment)
+                except Exception:
+                    continue
 
             if self.progressbar and self.duration:
                 offset = response['comments'][-1]['content_offset_seconds']
