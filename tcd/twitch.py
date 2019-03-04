@@ -103,16 +103,30 @@ class Channel(object):
         api_url = "https://api.twitch.tv/kraken/channels/{}"
         self.base_url = api_url.format(channel)
 
-    def videos(self, offset=0):
-        url = self.base_url + '/videos?limit=100'
-        url += '&broadcast_type=' + settings['video_types']
+    def _videos(self, types, offset=0, limit=100):
+        url = self.base_url + '/videos?limit={}'.format(limit)
+        url += '&broadcast_type=' + types
         url += '&offset={}'.format(offset)
 
         r = client.get(url).json()
 
         for video in r['videos']:
+            yield video
+        
+        if r['_total'] > limit + offset:
+            for video in self._videos(types, offset + limit, limit):
+                yield video
+
+    def videos(self, offset=0):
+        """Get VOD IDs"""
+        for video in self._videos(settings['video_types'], offset):
             yield int(video['_id'][1:])
 
-        if r['_total'] > 100 + offset:
-            for video in self.videos(offset=(offset+100)):
-                yield video
+    def live_vod(self):
+        """Get ID of ongoing stream"""
+        video = self._videos('archive', limit=5).__next__()
+
+        if video.get('status') == 'recording':
+            return video['_id'][1:]
+        else:
+            return None
