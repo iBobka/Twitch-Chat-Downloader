@@ -1,4 +1,4 @@
-# Twitch Chat Downloader
+# Twitch Chat Downloader [![PyPI version](https://badge.fury.io/py/tdh-tcd.svg)](https://badge.fury.io/py/tdh-tcd)
 
 Neat python script to download chat messages from past broadcasts
 
