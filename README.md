@@ -14,13 +14,13 @@ There are multiple ways to install this script.
 
 ```bash
 # Install package with pip
-pip install https://github.com/TheDrHax/Twitch-Chat-Downloader/archive/master.zip
-python -m tcd <video_id>
+pip3 install tdh-tcd
+python3 -m tcd <video_id>
 ```
 
 ```bash
-# Run pip as root to install `tcd` for all users
-sudo pip install https://github.com/TheDrHax/Twitch-Chat-Downloader/archive/master.zip
+# Run pip3 as root to install `tcd` for all users (not recommended)
+sudo pip3 install tdh-tcd
 tcd <video_id>
 ```
 
