@@ -1,3 +1,4 @@
 chats
 settings.json
 *.pyc
+__pycache__
