@@ -23,30 +23,59 @@ client.mount("https://", http_adapter)
 
 class Message(object):
     @staticmethod
-    def group(message):
-        prefs = settings.get('group_repeating_emotes')
-        if prefs is None or not prefs['enabled']:
+    def _find_groups(words, threshold=3, collocations=1):
+        groups = []
+        words = words.copy()
+
+        for size in range(min(collocations, len(words) // threshold + 1), 0, -1):
+            for pos in range(len(words) - size):
+                chunk = words[pos:pos+size]
+
+                if None in chunk or \
+                   len(Message._find_groups(chunk, threshold=2)) > 0:
+                    continue
+
+                count = 1
+                for j in range(1, len(words) // size):
+                    if chunk == words[pos+j*size:pos+j*size+size]:
+                        count += 1
+                    else:
+                        break
+
+                if count >= threshold:
+                    groups.append((chunk, pos, count))
+                    words[pos:pos+size*count] = [None] * size * count
+        
+        return groups
+
+    @staticmethod
+    def group(message, threshold=3, collocations=1,
+              group_format='{emote} x{count}', **kwargs):
+        words = message.split(' ')
+
+        if len(words) < threshold:
             return message
 
-        words = []
-        for word in message.split(' '):
-            if len(words) > 0 and words[-1][0] == word:
-                words[-1][1] += 1
-            else:
-                words.append([word, 1])
+        groups = sorted(Message._find_groups(words, threshold, collocations),
+                        key=lambda x: x[1], reverse=True)
 
-        result = []
-        for word, count in words:
-            if count >= prefs['threshold']:
-                result.append(prefs['format'].format(emote=word, count=count))
-            else:
-                result += [word] * count
+        for chunk, pos, count in groups:
+            emote = ' '.join(chunk)  # thin space!
+            words = words[:pos] + \
+                [group_format.format(emote=emote, count=count)] + \
+                words[pos + count * len(chunk):]
 
-        return ' '.join(result)
+        return ' '.join(words)
 
     def __init__(self, comment):
         self.user = comment['commenter']['display_name']
-        self.message = self.group(comment['message']['body'])
+
+        group_prefs = settings.get('group_repeating_emotes')
+        if group_prefs['enabled'] is True:
+            self.message = self.group(comment['message']['body'], **group_prefs)
+        else:
+            self.message = comment['message']['body']
+
         self.offset = comment['content_offset_seconds']
 
         if 'user_color' in comment['message']:

@@ -55,6 +55,7 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | group_repeating_emotes | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
 | —.enabled | *bool* | `--[no-]group` | Enable or disable this function. |
 | —.threshold | *int* | `--group-threshold` | Number of repeating emotes to trigger this function. |
+| —.collocations | *int* | `--group-collocations` | Maximum number of words in repeating collocations (default: 1, more is slower). |
 | —.format | *str* | `--group-format` | Customize format of replaced emotes. |
 | video_types | *str* | `--video-types` | Comma-separated list of VOD types to detect in Channel Mode. (see [broadcast_type](https://dev.twitch.tv/docs/v5/reference/channels/#get-channel-videos)) |
 

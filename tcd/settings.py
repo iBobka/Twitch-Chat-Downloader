@@ -40,8 +40,12 @@ if settings['version'].startswith("1"):
     sys.exit(1)
 
 if 'group_repeating_emotes' not in settings:
-    settings['group_repeating_emotes'] = {'enabled': False, 'threshold': 3,
+    settings['group_repeating_emotes'] = {'enabled': False,
+                                          'threshold': 3,
+                                          'collocations': 1,
                                           'format': '{emote} x{count}'}
+if 'collocations' not in settings['group_repeating_emotes']:
+    settings['group_repeating_emotes']['collocations'] = 1
 if 'video_types' not in settings:
     settings['video_types'] = 'archive'
 if 'dynamic_duration' not in settings:
@@ -122,6 +126,11 @@ def _post_init_parser(help=False):
         '--group-threshold', metavar='N', type=int,
         default=settings['group_repeating_emotes']['threshold'],
         help='Minimal number of repeating emotes to group.')
+    settings_group.add_argument(
+        '--group-collocations', metavar='N', type=int,
+        default=settings['group_repeating_emotes']['collocations'],
+        help=('Maximum number of words in repeating collocations '
+              '(default: 1, more is slower).'))
     settings_group.add_argument(
         '--group-format', metavar='FORMAT', type=str,
         default=settings['group_repeating_emotes']['format'],
