@@ -50,7 +50,7 @@ class Message(object):
 
     @staticmethod
     def group(message, threshold=3, collocations=1,
-              group_format='{emote} x{count}', **kwargs):
+              format='{emote} x{count}', **kwargs):
         words = message.split(' ')
 
         if len(words) < threshold:
@@ -62,7 +62,7 @@ class Message(object):
         for chunk, pos, count in groups:
             emote = ' '.join(chunk)  # thin space!
             words = words[:pos] + \
-                [group_format.format(emote=emote, count=count)] + \
+                [format.format(emote=emote, count=count)] + \
                 words[pos + count * len(chunk):]
 
         return ' '.join(words)
