@@ -71,10 +71,12 @@ class Message(object):
         self.user = comment['commenter']['display_name']
 
         group_prefs = settings.get('group_repeating_emotes')
+
+        message = comment['message']['body'].strip()
         if group_prefs['enabled'] is True:
-            self.message = self.group(comment['message']['body'], **group_prefs)
+            self.message = self.group(message, **group_prefs)
         else:
-            self.message = comment['message']['body']
+            self.message = message
 
         self.offset = comment['content_offset_seconds']
 
