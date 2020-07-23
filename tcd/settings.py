@@ -51,6 +51,8 @@ if 'video_types' not in settings:
 if 'dynamic_duration' not in settings:
     settings['dynamic_duration'] = {'enabled': False, 'max': 5,
                                     'max_length': 100}
+if 'max_width' not in settings:
+    settings['max_width'] = -1
 
 #
 # Post-init settings overrides
@@ -91,6 +93,11 @@ def _post_init_parser(help=False):
         default=settings['filename_format'],
         help=('Python str.format for generating output file names. Available '
               'variables: {directory}, {video_id} and {format}.'))
+    settings_group.add_argument(
+        '--max-width', metavar='chars', type=int,
+        default=settings['max_width'],
+        help=('Add line breaks to fit messages into specified width. '
+              'Note: Implemented only for SSA/ASS subtitles.'))
     settings_group.add_argument(
         '--subtitle-duration', metavar='sec', type=int,
         default=settings['subtitle_duration'],
@@ -164,6 +171,7 @@ settings['display_progress'] = args.progress
 settings['formats'] = args.formats
 settings['directory'] = args.directory
 settings['filename_format'] = args.filename_format
+settings['max_width'] = args.max_width
 settings['subtitle_duration'] = args.subtitle_duration
 settings['dynamic_duration']['enabled'] = args.dynamic
 settings['dynamic_duration']['max'] = args.dynamic_duration_max

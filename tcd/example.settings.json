@@ -9,6 +9,7 @@
   "directory": "chats",
   "filename_format": "{directory}/v{video_id}.{format}",
 
+  "max_width": -1,
   "subtitle_duration": 2,
 
   "dynamic_duration": {

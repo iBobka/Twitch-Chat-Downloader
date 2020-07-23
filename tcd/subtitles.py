@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import io
 import os
+import textwrap
 
 from datetime import timedelta
 
@@ -51,6 +52,16 @@ class Subtitle(object):
 
         return offset
 
+    @staticmethod
+    def wrap(username, text):
+        max_width = settings['max_width']
+        full_text = username + ': ' + text
+
+        if len(full_text) <= max_width or max_width <= 0:
+            return text
+        
+        return '\n'.join(textwrap.wrap(full_text, max_width))[len(username)+2:]
+
     def close(self):
         self.file.flush()
         self.file.close()
@@ -84,6 +95,10 @@ class SubtitlesASS(Subtitle):
     @staticmethod
     def _color(text, color):
         return '{\\c&H' + color + '&}' + text + '{\\c&HFFFFFF&}'
+
+    @staticmethod
+    def wrap(username, message):
+        return Subtitle.wrap(username, message).replace('\n', '\\N')
 
     def add(self, comment):
         offset = comment.offset
