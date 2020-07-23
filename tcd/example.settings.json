@@ -27,6 +27,7 @@
     "enabled": false,
     "threshold": 3,
     "collocations": 5,
+    "collocations_threshold": 2,
     "format": "{emote} x{count}"
   },
 

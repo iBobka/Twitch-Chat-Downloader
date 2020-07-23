@@ -56,6 +56,7 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | —.enabled | *bool* | `--[no-]group` | Enable or disable this function. |
 | —.threshold | *int* | `--group-threshold` | Number of repeating emotes to trigger this function. |
 | —.collocations | *int* | `--group-collocations` | Maximum number of words in repeating collocations (default: 1, more is slower). |
+| —.collocations_threshold | *int* | `--group-collocations-threshold` | Same logic as in —.threshold, but applies only to repeating collocations. |
 | —.format | *str* | `--group-format` | Customize format of replaced emotes. |
 | video_types | *str* | `--video-types` | Comma-separated list of VOD types to detect in Channel Mode. (see [broadcast_type](https://dev.twitch.tv/docs/v5/reference/channels/#get-channel-videos)) |
 

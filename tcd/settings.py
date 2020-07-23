@@ -46,6 +46,9 @@ if 'group_repeating_emotes' not in settings:
                                           'format': '{emote} x{count}'}
 if 'collocations' not in settings['group_repeating_emotes']:
     settings['group_repeating_emotes']['collocations'] = 1
+if 'collocations_threshold' not in settings['group_repeating_emotes']:
+    settings['group_repeating_emotes']['collocations_threshold'] = \
+        settings['group_repeating_emotes']['collocations']
 if 'video_types' not in settings:
     settings['video_types'] = 'archive'
 if 'dynamic_duration' not in settings:
@@ -130,14 +133,19 @@ def _post_init_parser(help=False):
         help='Opposite of --group.')
 
     settings_group.add_argument(
-        '--group-threshold', metavar='N', type=int,
+        '--group-threshold', metavar='repeats', type=int,
         default=settings['group_repeating_emotes']['threshold'],
         help='Minimal number of repeating emotes to group.')
     settings_group.add_argument(
-        '--group-collocations', metavar='N', type=int,
+        '--group-collocations', metavar='words', type=int,
         default=settings['group_repeating_emotes']['collocations'],
         help=('Maximum number of words in repeating collocations '
               '(default: 1, more is slower).'))
+    settings_group.add_argument(
+        '--group-collocations-threshold', metavar='repeats', type=int,
+        default=settings['group_repeating_emotes']['collocations_threshold'],
+        help=('Same logic as in --group-threshold, but applies only to '
+              'repeating collocations.'))
     settings_group.add_argument(
         '--group-format', metavar='FORMAT', type=str,
         default=settings['group_repeating_emotes']['format'],
@@ -178,6 +186,8 @@ settings['dynamic_duration']['max'] = args.dynamic_duration_max
 settings['dynamic_duration']['max_length'] = args.dynamic_duration_max_length
 settings['group_repeating_emotes']['enabled'] = args.group
 settings['group_repeating_emotes']['threshold'] = args.group_threshold
+settings['group_repeating_emotes']['colocations'] = args.group_collocations
+settings['group_repeating_emotes']['collocations_threshold'] = args.group_collocations_threshold
 settings['group_repeating_emotes']['format'] = args.group_format
 settings['video_types'] = args.video_types
 

@@ -23,7 +23,8 @@ client.mount("https://", http_adapter)
 
 class Message(object):
     @staticmethod
-    def _find_groups(words, threshold=3, collocations=1):
+    def _find_groups(words, threshold=3, collocations=1,
+                     collocations_threshold=2):
         groups = []
         words = words.copy()
 
@@ -42,22 +43,24 @@ class Message(object):
                     else:
                         break
 
-                if count >= threshold:
+                if count >= threshold or \
+                   len(chunk) > 1 and count >= collocations_threshold:
                     groups.append((chunk, pos, count))
                     words[pos:pos+size*count] = [None] * size * count
         
         return groups
 
     @staticmethod
-    def group(message, threshold=3, collocations=1,
+    def group(message, threshold=3, collocations=1, collocations_threshold=2,
               format='{emote} x{count}', **kwargs):
         words = message.split(' ')
 
         if len(words) < threshold:
             return message
 
-        groups = sorted(Message._find_groups(words, threshold, collocations),
-                        key=lambda x: x[1], reverse=True)
+        groups = Message._find_groups(words, threshold, collocations,
+                                      collocations_threshold)
+        groups = sorted(groups, key=lambda x: x[1], reverse=True)
 
         for chunk, pos, count in groups:
             emote = ' '.join(chunk)  # thin space!
