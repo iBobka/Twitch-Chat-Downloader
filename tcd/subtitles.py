@@ -59,8 +59,12 @@ class Subtitle(object):
 
         if len(full_text) <= max_width or max_width <= 0:
             return text
-        
-        return '\n'.join(textwrap.wrap(full_text, max_width))[len(username)+2:]
+
+        text = textwrap.wrap(full_text, max_width, drop_whitespace=False)
+        text = '\n'.join(text).replace('\n ', ' \n')
+        text = text[len(username)+2:]
+
+        return text
 
     def close(self):
         self.file.flush()
