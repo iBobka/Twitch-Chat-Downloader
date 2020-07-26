@@ -112,7 +112,7 @@ class SubtitlesASS(Subtitle):
             start=self._offset(offset)[:-4],
             end=self._offset(offset + self._duration(comment.message))[:-4],
             user=self._color(comment.user, color),
-            message=comment.message
+            message=self.wrap(comment.user, comment.message)
         ))
 
 
