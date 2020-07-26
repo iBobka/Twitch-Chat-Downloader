@@ -9,7 +9,7 @@ with open('README.md', 'r') as fi:
 
 setup(
     name='tdh-tcd',
-    version='2.4.5',
+    version='2.4.6',
 
     author='Dmitry Karikh',
     author_email='the.dr.hax@gmail.com',
