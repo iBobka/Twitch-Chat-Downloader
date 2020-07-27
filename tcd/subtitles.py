@@ -7,7 +7,7 @@ import io
 import os
 import textwrap
 
-from datetime import timedelta
+from datetime import timedelta, datetime as dtt
 
 from .settings import settings
 
@@ -42,15 +42,9 @@ class Subtitle(object):
             return T_MIN
 
     @staticmethod
-    def _offset(seconds, decimal_separator='.'):
-        offset = str(timedelta(seconds=seconds))
-        if '.' not in offset:
-            offset += '.000000'
-
-        if decimal_separator != '.':
-            offset.replace('.', decimal_separator)
-
-        return offset
+    def ftime(seconds: float) -> str:
+        t = dtt.strptime("00:00", "%H:%M") + timedelta(seconds=seconds)
+        return dtt.strftime(t, '%-H:%M:%S.%f')
 
     @staticmethod
     def wrap(username, text):
@@ -104,13 +98,17 @@ class SubtitlesASS(Subtitle):
     def wrap(username, message):
         return Subtitle.wrap(username, message).replace('\n', '\\N')
 
+    @staticmethod
+    def ftime(seconds: float) -> str:
+        return Subtitle.ftime(seconds)[:-4]
+
     def add(self, comment):
         offset = round(comment.offset, 2)
         color = self._rgb_to_bgr(comment.color)
 
         self.file.write(self.line.format(
-            start=self._offset(offset)[:-4],
-            end=self._offset(offset + self._duration(comment.message))[:-4],
+            start=self.ftime(offset),
+            end=self.ftime(offset + self._duration(comment.message)),
             user=self._color(comment.user, color),
             message=self.wrap(comment.user, comment.message)
         ))
@@ -121,13 +119,17 @@ class SubtitlesSRT(Subtitle):
         super(SubtitlesSRT, self).__init__(video_id, "srt")
         self.count = 0
 
+    @staticmethod
+    def ftime(seconds):
+        return Subtitle.ftime(seconds)[:-3].replace('.', ',')
+
     def add(self, comment):
         time = comment.offset
 
         self.file.write(str(self.count) + '\n')
         self.file.write("{start} --> {end}\n".format(
-            start=self._offset(time, ',')[:-3],
-            end=self._offset(time + self._duration(comment.message), ',')[:-3]
+            start=self.ftime(time),
+            end=self.ftime(time + self._duration(comment.message))
         ))
         self.file.write("{user}: {message}\n\n".format(
             user=comment.user,
@@ -141,9 +143,13 @@ class SubtitlesIRC(Subtitle):
     def __init__(self, video_id):
         super(SubtitlesIRC, self).__init__(video_id, "irc")
 
+    @staticmethod
+    def ftime(seconds):
+        return Subtitle.ftime(seconds)[:-3].replace('.', ',')
+
     def add(self, comment):
         self.file.write("[{start}] <{user}> {message}\n".format(
-            start=self._offset(comment.offset, ',')[:-3],
+            start=self.ftime(comment.offset),
             user=comment.user,
             message=comment.message
         ))
