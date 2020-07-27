@@ -105,7 +105,7 @@ class SubtitlesASS(Subtitle):
         return Subtitle.wrap(username, message).replace('\n', '\\N')
 
     def add(self, comment):
-        offset = comment.offset
+        offset = round(comment.offset, 2)
         color = self._rgb_to_bgr(comment.color)
 
         self.file.write(self.line.format(
