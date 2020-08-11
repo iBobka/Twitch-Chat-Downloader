@@ -44,7 +44,8 @@ class Subtitle(object):
     @staticmethod
     def ftime(seconds: float) -> str:
         t = dtt.strptime("00:00", "%H:%M") + timedelta(seconds=seconds)
-        return dtt.strftime(t, '%-H:%M:%S.%f')
+        ts = dtt.strftime(t, '%H:%M:%S.%f')
+        return ts[1:] if ts.startswith('00') else ts
 
     @staticmethod
     def wrap(username, text):
