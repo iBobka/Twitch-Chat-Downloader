@@ -21,7 +21,8 @@ setup(
 
     install_requires=[
         'requests',
-        'progressbar2'
+        'progressbar2',
+        'iso8601'
     ],
 
     packages=find_packages(),

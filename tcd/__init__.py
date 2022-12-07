@@ -26,7 +26,8 @@ def download_all(channel, min=0, max=None, count=None):
 
     for video in videos:
         if (not max or video <= max) and video >= min:
-            to_download.append(video)
+            print(f'Downloading chat for {video}')
+            download(video)
 
         if count and len(to_download) >= count:
             break

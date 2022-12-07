@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from time import sleep
+from iso8601 import parse_date as parse8601
 from progressbar import ProgressBar
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -19,6 +20,15 @@ retries = Retry(connect=5, read=2, redirect=5)
 http_adapter = HTTPAdapter(max_retries=retries)
 client.mount("http://", http_adapter)
 client.mount("https://", http_adapter)
+
+
+def gql(query: str):
+    res = client.post('https://gql.twitch.tv/gql', json={'query': query})
+
+    if res.status_code == 200:
+        return res.json()
+    else:
+        raise Exception(res.text)
 
 
 class Message(object):
@@ -71,20 +81,22 @@ class Message(object):
         return ' '.join(words)
 
     def __init__(self, comment):
-        self.user = comment['commenter']['display_name']
+        self.user = comment['commenter']['displayName']
 
         group_prefs = settings.get('group_repeating_emotes')
 
-        message = comment['message']['body'].strip()
+        message = ''.join(frag['text']
+                          for frag in comment['message']['fragments']).strip()
+
         if group_prefs['enabled'] is True:
             self.message = self.group(message, **group_prefs)
         else:
             self.message = message
 
-        self.offset = comment['content_offset_seconds']
+        self.offset = comment['contentOffsetSeconds']
 
-        if 'user_color' in comment['message']:
-            self.color = comment['message']['user_color'][1:]
+        if comment['message']['userColor']:
+            self.color = comment['message']['userColor'][1:]
         else:
             self.color = 'FFFFFF'
 
@@ -92,40 +104,76 @@ class Message(object):
 class Messages(object):
     def __init__(self, video_id):
         self.video_id = video_id
-        api_url = "https://api.twitch.tv/v5/videos/{id}/comments"
-        self.base_url = api_url.format(id=video_id)
 
-        # Get video object from API
+        video = gql(f'''
+            query {{
+                video(id: {video_id}) {{
+                    createdAt
+                    lengthSeconds
+                }}
+            }}
+        ''')
+
+        self.created_at = parse8601(video['data']['video']['createdAt'])
+        self.duration = video['data']['video']['lengthSeconds']
+
         if settings.get('display_progress') in [None, True]:
-            api_video_url = 'https://api.twitch.tv/v5/videos/{}'
-            video = client.get(api_video_url.format(video_id)).json()
-            self.duration = video['length']
             self.progressbar = ProgressBar(max_value=self.duration)
-        else:
-            self.progressbar = None
-
+    
     def __iter__(self):
-        url = self.base_url + "?content_offset_seconds=0"
+        hasNextPage = True
+        cursor = None
 
-        while True:
-            response = client.get(url).json()
+        while hasNextPage:
+            res = gql(f'''
+                query {{
+                    video(id: "{self.video_id}") {{
+                        comments{f'(after: "{cursor}")' if cursor else ''} {{
+                            edges {{
+                                cursor
+                                node {{
+                                    commenter {{
+                                        displayName
+                                        login
+                                    }}
+                                    createdAt
+                                    contentOffsetSeconds
+                                    message {{
+                                        fragments {{
+                                            text
+                                        }}
+                                        userColor
+                                    }}
+                                }}
+                            }}
 
-            for comment in response["comments"]:
+                            pageInfo {{
+                                hasNextPage
+                            }}
+                        }}
+                    }}
+                }}
+            ''')
+
+            comments = res['data']['video']['comments']
+            hasNextPage = comments['pageInfo']['hasNextPage']
+
+            for comment in comments['edges']:
+                cursor = comment['cursor']
+
+                # Calculate more accurate offset
+                ts = parse8601(comment['node']['createdAt'])
+                offset = (ts - self.created_at).total_seconds()
+                comment['node']['contentOffsetSeconds'] = offset
+
                 try:
-                    yield Message(comment)
+                    yield Message(comment['node'])
                 except Exception:
                     continue
 
-            if self.progressbar and self.duration:
-                offset = response['comments'][-1]['content_offset_seconds']
-                self.progressbar.update(min(offset, self.duration))
-
-            if '_next' not in response:
-                if self.progressbar:
-                    self.progressbar.finish()
-                break
-
-            url = self.base_url + "?cursor=" + response['_next']
+            if self.progressbar:
+                ts = comments['edges'][-1]['node']['contentOffsetSeconds']
+                self.progressbar.update(min(self.duration, ts))
 
             if settings['cooldown'] > 0:
                 sleep(settings['cooldown'] / 1000)
@@ -134,33 +182,34 @@ class Messages(object):
 class Channel(object):
     def __init__(self, channel):
         self.name = channel
-        api_url = "https://api.twitch.tv/kraken/channels/{}"
-        self.base_url = api_url.format(channel)
 
-    def _videos(self, types, offset=0, limit=100):
-        url = self.base_url + '/videos?limit={}'.format(limit)
-        url += '&broadcast_type=' + types
-        url += '&offset={}'.format(offset)
+    def videos(self):
+        hasNextPage = True
+        cursor = None
 
-        r = client.get(url).json()
+        while hasNextPage:
+            res = gql(f'''
+                query {{
+                    user(login: "{self.name}") {{
+                        videos({f'after: "{cursor}"' if cursor else 'type: ARCHIVE'}) {{
+                            edges {{
+                                cursor
+                                node {{
+                                    id
+                                    createdAt
+                                }}
+                            }}
+                            pageInfo {{
+                                hasNextPage
+                            }}
+                        }}
+                    }}
+                }}
+            ''')
 
-        for video in r['videos']:
-            yield video
-        
-        if r['_total'] > limit + offset:
-            for video in self._videos(types, offset + limit, limit):
-                yield video
+            videos = res['data']['user']['videos']
+            hasNextPage = videos['pageInfo']['hasNextPage']
+            cursor = videos['edges'][-1]['cursor']
 
-    def videos(self, offset=0):
-        """Get VOD IDs"""
-        for video in self._videos(settings['video_types'], offset):
-            yield int(video['_id'][1:])
-
-    def live_vod(self):
-        """Get ID of ongoing stream"""
-        video = self._videos('archive', limit=5).__next__()
-
-        if video.get('status') == 'recording':
-            return video['_id'][1:]
-        else:
-            return None
+            for video in res['data']['user']['videos']['edges']:
+                yield int(video['node']['id'])
