@@ -53,6 +53,7 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | —.enabled | *bool* | `--[no-]dynamic-duration` | Enable or disable this function. |
 | —.max | *int* | `--dynamic-duration-max` | Maximum duration of subtitle message. |
 | —.max_length | *int* | `--dynamic-duration-max-length` | Maximum length of subtitle message. |
+| millisecond_separator | *str* | `--millisecond-separator` | Separator between seconds and milliseconds in timestamps (IRC only). |
 | group_repeating_emotes | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
 | —.enabled | *bool* | `--[no-]group` | Enable or disable this function. |
 | —.threshold | *int* | `--group-threshold` | Number of repeating emotes to trigger this function. |
