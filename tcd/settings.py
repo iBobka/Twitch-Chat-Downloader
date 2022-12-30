@@ -11,9 +11,16 @@ from argparse import ArgumentParser
 SELF = inspect.getfile(inspect.currentframe())
 ROOT = os.path.dirname(os.path.abspath(SELF))
 
-settings_file_default = 'settings.json'
-if not os.path.isfile(settings_file_default):
-    settings_file_default = ROOT + '/example.settings.json'
+settings_filename = 'settings.json'
+home_settings_path = os.path.join(os.path.expanduser('~'), '.config/tcd', settings_filename)
+example_settings_path = os.path.join(ROOT, f'example.{settings_filename}')
+
+if os.path.isfile(settings_filename):
+    settings_file_default = settings_filename
+elif os.path.isfile(home_settings_path):
+    settings_file_default = home_settings_path
+else:
+    settings_file_default = example_settings_path
 
 
 def _pre_init_parser(help=False):
