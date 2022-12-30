@@ -128,6 +128,10 @@ def _post_init_parser(help=False):
         '--dynamic-duration-max-length', metavar='chars', type=int,
         default=settings['dynamic_duration']['max_length'],
         help='Maximum length of subtitle message.')
+    settings_group.add_argument(
+        '--millisecond-separator', metavar='FORMAT', type=str,
+        default=settings['millisecond_separator'],
+        help='Separator between seconds and milliseconds in timestamps.')
 
     group = settings_group.add_mutually_exclusive_group(required=False)
     group.add_argument(
@@ -191,6 +195,7 @@ settings['subtitle_duration'] = args.subtitle_duration
 settings['dynamic_duration']['enabled'] = args.dynamic
 settings['dynamic_duration']['max'] = args.dynamic_duration_max
 settings['dynamic_duration']['max_length'] = args.dynamic_duration_max_length
+settings['millisecond_separator'] = args.millisecond_separator
 settings['group_repeating_emotes']['enabled'] = args.group
 settings['group_repeating_emotes']['threshold'] = args.group_threshold
 settings['group_repeating_emotes']['collocations'] = args.group_collocations
