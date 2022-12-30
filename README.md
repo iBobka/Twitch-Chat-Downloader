@@ -49,8 +49,8 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | filename_format | *str* | `--filename-format` | Full format of generated filenames. Possible arguments: `directory`, `video_id` and `format`. |
 | max_width | *int* | `--max-width` | Add line breaks to fit messages into specified width. Note: Implemented only for SSA/ASS subtitles. |
 | subtitle_duration | *int* | `--subtitle-duration` | Duration (in seconds) of each line of subtitles. |
-| dynamic_duration | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
-| —.enabled | *bool* | `--[no-]dynamic-duration` | Increase subtitle duration based on message length. |
+| dynamic_duration | *obj* |  | Increase subtitle duration based on message length. |
+| —.enabled | *bool* | `--[no-]dynamic-duration` | Enable or disable this function. |
 | —.max | *int* | `--dynamic-duration-max` | Maximum duration of subtitle message. |
 | —.max_length | *int* | `--dynamic-duration-max-length` | Maximum length of subtitle message. |
 | group_repeating_emotes | *obj* |  | Convert `Kappa Kappa Kappa` to `Kappa x3`. |
@@ -59,6 +59,10 @@ To override default options, run `python -m tcd --generate-config` and edit gene
 | —.collocations | *int* | `--group-collocations` | Maximum number of words in repeating collocations (default: 1, more is slower). |
 | —.collocations_threshold | *int* | `--group-collocations-threshold` | Same logic as in —.threshold, but applies only to repeating collocations. |
 | —.format | *str* | `--group-format` | Customize format of replaced emotes. |
+| badges | *obj* |  | Add badges before the username (IRC only). |
+| —.enabled | *bool* | `--[no-]badges` | Enable or disable this function. |
+| —.max_count | *int* | `--badges-max` | Only show the first N badges (default: 1) |
+| —.map | *obj* | | Configure which symbol corresponds to a specific badge. |
 | video_types | *str* | `--video-types` | Comma-separated list of VOD types to detect in Channel Mode. (see [broadcast_type](https://dev.twitch.tv/docs/v5/reference/channels/#get-channel-videos)) |
 
 ## Formats

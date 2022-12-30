@@ -83,6 +83,20 @@ class Message(object):
     def __init__(self, comment):
         self.user = comment['commenter']['displayName']
 
+        if settings['badges']['enabled']:
+            badges = [settings['badges']['map'][badge['setID']]
+                      for badge in comment['commenter']['displayBadges']
+                      if badge['setID'] in settings['badges']['map']]
+
+            max_count = settings['badges']['max_count']
+            if max_count >= 1:
+                if len(badges) > max_count:
+                    badges = badges[0:max_count]
+
+            self.badge = ''.join(badges)
+        else:
+            self.badge = ''
+
         group_prefs = settings.get('group_repeating_emotes')
 
         message = ''.join(frag['text']
@@ -108,6 +122,9 @@ class Messages(object):
         video = gql(f'''
             query {{
                 video(id: {video_id}) {{
+                    creator {{
+                        id
+                    }}
                     createdAt
                     lengthSeconds
                 }}
@@ -116,6 +133,7 @@ class Messages(object):
 
         self.created_at = parse8601(video['data']['video']['createdAt'])
         self.duration = video['data']['video']['lengthSeconds']
+        self.creator_id = video['data']['video']['creator']['id']
 
         if settings.get('display_progress') in [None, True]:
             self.progressbar = ProgressBar(max_value=self.duration)
@@ -135,6 +153,9 @@ class Messages(object):
                                     commenter {{
                                         displayName
                                         login
+                                        displayBadges(channelID: {self.creator_id}) {{
+                                            setID
+                                        }}
                                     }}
                                     createdAt
                                     contentOffsetSeconds
