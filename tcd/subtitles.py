@@ -22,9 +22,6 @@ def clean_filename(string, valid_filename_regex=re.compile(r'(?u)[^-\w.()\[\]{}@
 class Subtitle(object):
     @staticmethod
     def new_file(video_id, format):
-        if not os.path.exists(settings['directory']):
-            os.makedirs(settings['directory'])
-
         video_info = gql(f'''
             query {{
                 video(id: {video_id}) {{
@@ -49,6 +46,9 @@ class Subtitle(object):
             title=clean_filename(video_info['data']['video']['title']),
             created_at=clean_filename(time_str)
         )
+
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
 
         return io.open(filename, mode='w+', encoding='UTF8')
 
