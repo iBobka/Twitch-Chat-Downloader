@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import sys
 import json
@@ -41,9 +38,9 @@ with open(settings_file, 'r') as settings_file:
     settings = json.load(settings_file)
 
 # Check for outdated settings.json
-if settings['version'].startswith("1"):
-    print("Please update your settings.json " +
-          "(see example.settings.json for examples)")
+if settings['version'].startswith('1'):
+    print('Please update your settings.json ' +
+          '(see example.settings.json for examples)')
     sys.exit(1)
 
 if 'millisecond_separator' not in settings:

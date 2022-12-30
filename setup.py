@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from setuptools import setup, find_packages
 
 
@@ -36,8 +34,7 @@ setup(
 
     classifiers=[
         'Environment :: Console',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.6',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',

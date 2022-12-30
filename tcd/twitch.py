@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from time import sleep
 from iso8601 import parse_date as parse8601
 from progressbar import ProgressBar
@@ -12,14 +9,14 @@ from .settings import settings
 
 
 client = Session()
-client.headers["Acccept"] = "application/vnd.twitchtv.v5+json"
-client.headers["Client-ID"] = settings['client_id']
+client.headers['Acccept'] = 'application/vnd.twitchtv.v5+json'
+client.headers['Client-ID'] = settings['client_id']
 
 # Configure retries for all requests
 retries = Retry(connect=5, read=2, redirect=5)
 http_adapter = HTTPAdapter(max_retries=retries)
-client.mount("http://", http_adapter)
-client.mount("https://", http_adapter)
+client.mount('http://', http_adapter)
+client.mount('https://', http_adapter)
 
 
 def gql(query: str):

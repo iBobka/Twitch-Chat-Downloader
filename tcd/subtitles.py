@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from __future__ import unicode_literals
 
 import io
@@ -35,7 +32,7 @@ class Subtitle(object):
 
     @staticmethod
     def ftime(seconds: float) -> str:
-        t = dtt.strptime("00:00", "%H:%M") + timedelta(seconds=seconds)
+        t = dtt.strptime('00:00', '%H:%M') + timedelta(seconds=seconds)
         ts = dtt.strftime(t, '%H:%M:%S.%f')
         return ts[1:] if ts.startswith('00') else ts
 
@@ -120,11 +117,11 @@ class SubtitlesSRT(Subtitle):
         time = comment.offset
 
         self.file.write(str(self.count) + '\n')
-        self.file.write("{start} --> {end}\n".format(
+        self.file.write('{start} --> {end}\n'.format(
             start=self.ftime(time),
             end=self.ftime(time + self._duration(comment.message))
         ))
-        self.file.write("{user}: {message}\n\n".format(
+        self.file.write('{user}: {message}\n\n'.format(
             user=comment.user,
             message=comment.message
         ))
@@ -141,7 +138,7 @@ class SubtitlesIRC(Subtitle):
         return Subtitle.ftime(seconds)[:-3].replace('.', settings['millisecond_separator'])
 
     def add(self, comment):
-        self.file.write("[{start}] <{badge}{user}> {message}\n".format(
+        self.file.write('[{start}] <{badge}{user}> {message}\n'.format(
             start=self.ftime(comment.offset),
             badge=comment.badge,
             user=comment.user,
