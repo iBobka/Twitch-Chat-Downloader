@@ -141,8 +141,9 @@ class SubtitlesIRC(Subtitle):
         return Subtitle.ftime(seconds)[:-3].replace('.', settings['millisecond_separator'])
 
     def add(self, comment):
-        self.file.write("[{start}] <{user}> {message}\n".format(
+        self.file.write("[{start}] <{badge}{user}> {message}\n".format(
             start=self.ftime(comment.offset),
+            badge=comment.badge,
             user=comment.user,
             message=comment.message
         ))
