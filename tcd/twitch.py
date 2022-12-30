@@ -83,16 +83,19 @@ class Message(object):
     def __init__(self, comment):
         self.user = comment['commenter']['displayName']
 
-        badges = [settings['badges'][badge['setID']]
-                  for badge in comment['commenter']['displayBadges']
-                  if badge['setID'] in settings['badges']]
+        if settings['badges']['enabled']:
+            badges = [settings['badges']['map'][badge['setID']]
+                      for badge in comment['commenter']['displayBadges']
+                      if badge['setID'] in settings['badges']['map']]
 
-        if len(badges) == 0:
-            self.badge = ''
-        if settings['multiple_badges']:
+            max_count = settings['badges']['max_count']
+            if max_count >= 1:
+                if len(badges) > max_count:
+                    badges = badges[0:max_count]
+
             self.badge = ''.join(badges)
         else:
-            self.badge = badges[0]
+            self.badge = ''
 
         group_prefs = settings.get('group_repeating_emotes')
 

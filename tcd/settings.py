@@ -56,6 +56,8 @@ if 'dynamic_duration' not in settings:
                                     'max_length': 100}
 if 'max_width' not in settings:
     settings['max_width'] = -1
+if 'badges' not in settings:
+    settings['badges'] = {'enabled': False, 'max_count': 1, 'map': {}}
 
 #
 # Post-init settings overrides
