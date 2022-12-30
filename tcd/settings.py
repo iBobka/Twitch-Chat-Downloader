@@ -154,6 +154,20 @@ def _post_init_parser(help=False):
         help=('Python str.format for grouped emotes. Available '
               'variables: {emote} and {count}.'))
 
+    badges = settings_group.add_mutually_exclusive_group(required=False)
+    badges.add_argument(
+        '--badges', action='store_true', dest='badges',
+        default=settings['badges']['enabled'],
+        help=('Add badges before usernames (IRC only).'))
+    badges.add_argument(
+        '--no-badges', action='store_false', dest='group',
+        help='Opposite of --badges.')
+
+    settings_group.add_argument(
+        '--badges-max', metavar='n', type=int,
+        default=settings['badges']['max_count'],
+        help='Maximum number of badges per user.')
+
     channel_group = parser.add_argument_group(
         'Channel Mode Settings',
         'These options will only work with -c/--channel.')
@@ -191,6 +205,8 @@ settings['group_repeating_emotes']['threshold'] = args.group_threshold
 settings['group_repeating_emotes']['collocations'] = args.group_collocations
 settings['group_repeating_emotes']['collocations_threshold'] = args.group_collocations_threshold
 settings['group_repeating_emotes']['format'] = args.group_format
+settings['badges']['enabled'] = args.badges
+settings['badges']['max_count'] = args.badges_max
 settings['video_types'] = args.video_types
 
 
