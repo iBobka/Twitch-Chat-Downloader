@@ -46,6 +46,8 @@ if settings['version'].startswith("1"):
           "(see example.settings.json for examples)")
     sys.exit(1)
 
+if 'millisecond_separator' not in settings:
+    settings['millisecond_separator'] = ','
 if 'group_repeating_emotes' not in settings:
     settings['group_repeating_emotes'] = {'enabled': False,
                                           'threshold': 3,
@@ -102,7 +104,8 @@ def _post_init_parser(help=False):
         '--filename-format', metavar='FORMAT', type=str,
         default=settings['filename_format'],
         help=('Python str.format for generating output file names. Available '
-              'variables: {directory}, {video_id}, {format}, {user_name}, {title}, and {created_at}.'))
+              'variables: {directory}, {video_id}, {format}, {user_name}, '
+              '{title}, and {created_at}.'))
     settings_group.add_argument(
         '--max-width', metavar='chars', type=int,
         default=settings['max_width'],
