@@ -11,9 +11,16 @@ from argparse import ArgumentParser
 SELF = inspect.getfile(inspect.currentframe())
 ROOT = os.path.dirname(os.path.abspath(SELF))
 
-settings_file_default = 'settings.json'
-if not os.path.isfile(settings_file_default):
-    settings_file_default = ROOT + '/example.settings.json'
+settings_filename = 'settings.json'
+home_settings_path = os.path.join(os.path.expanduser('~'), '.config/tcd', settings_filename)
+example_settings_path = os.path.join(ROOT, f'example.{settings_filename}')
+
+if os.path.isfile(settings_filename):
+    settings_file_default = settings_filename
+elif os.path.isfile(home_settings_path):
+    settings_file_default = home_settings_path
+else:
+    settings_file_default = example_settings_path
 
 
 def _pre_init_parser(help=False):
@@ -39,6 +46,8 @@ if settings['version'].startswith("1"):
           "(see example.settings.json for examples)")
     sys.exit(1)
 
+if 'millisecond_separator' not in settings:
+    settings['millisecond_separator'] = ','
 if 'group_repeating_emotes' not in settings:
     settings['group_repeating_emotes'] = {'enabled': False,
                                           'threshold': 3,
@@ -97,7 +106,8 @@ def _post_init_parser(help=False):
         '--filename-format', metavar='FORMAT', type=str,
         default=settings['filename_format'],
         help=('Python str.format for generating output file names. Available '
-              'variables: {directory}, {video_id} and {format}.'))
+              'variables: {directory}, {video_id}, {format}, {user_name}, '
+              '{title}, and {created_at}.'))
     settings_group.add_argument(
         '--max-width', metavar='chars', type=int,
         default=settings['max_width'],
@@ -123,6 +133,10 @@ def _post_init_parser(help=False):
         '--dynamic-duration-max-length', metavar='chars', type=int,
         default=settings['dynamic_duration']['max_length'],
         help='Maximum length of subtitle message.')
+    settings_group.add_argument(
+        '--millisecond-separator', metavar='FORMAT', type=str,
+        default=settings['millisecond_separator'],
+        help='Separator between seconds and milliseconds in timestamps.')
 
     group = settings_group.add_mutually_exclusive_group(required=False)
     group.add_argument(
@@ -200,6 +214,7 @@ settings['subtitle_duration'] = args.subtitle_duration
 settings['dynamic_duration']['enabled'] = args.dynamic
 settings['dynamic_duration']['max'] = args.dynamic_duration_max
 settings['dynamic_duration']['max_length'] = args.dynamic_duration_max_length
+settings['millisecond_separator'] = args.millisecond_separator
 settings['group_repeating_emotes']['enabled'] = args.group
 settings['group_repeating_emotes']['threshold'] = args.group_threshold
 settings['group_repeating_emotes']['collocations'] = args.group_collocations

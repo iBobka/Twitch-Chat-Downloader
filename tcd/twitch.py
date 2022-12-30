@@ -123,16 +123,20 @@ class Messages(object):
             query {{
                 video(id: {video_id}) {{
                     creator {{
+                        displayName
                         id
                     }}
                     createdAt
                     lengthSeconds
+                    title
                 }}
             }}
         ''')
 
         self.created_at = parse8601(video['data']['video']['createdAt'])
         self.duration = video['data']['video']['lengthSeconds']
+        self.title = video['data']['video']['title']
+        self.creator_name = video['data']['video']['creator']['displayName']
         self.creator_id = video['data']['video']['creator']['id']
 
         if settings.get('display_progress') in [None, True]:
