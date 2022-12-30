@@ -9,51 +9,17 @@ import re
 import textwrap
 
 from datetime import timedelta, datetime as dtt
-from iso8601 import parse_date as parse8601
 
 from .settings import settings
-from .twitch import gql
-
-
-def clean_filename(string, valid_filename_regex=re.compile(r'(?u)[^-\w.()\[\]{}@%! ]')):
-    return re.sub(valid_filename_regex, '', string.strip())
+from .twitch import Messages
 
 
 class Subtitle(object):
-    @staticmethod
-    def new_file(video_id, format):
-        video_info = gql(f'''
-            query {{
-                video(id: {video_id}) {{
-                    creator {{
-                        displayName
-                    }}
-                    createdAt
-                    title
-                }}
-            }}
-        ''')
-
-        created_at = parse8601(video_info['data']['video']['createdAt'])
-        # TODO: make time configurable
-        time_str = str(created_at.replace(microsecond=0).replace(tzinfo=None).isoformat())
-
-        filename = settings['filename_format'].format(
-            directory=settings['directory'],
-            video_id=video_id,
-            format=format,
-            user_name=clean_filename(video_info['data']['video']['creator']['displayName']),
-            title=clean_filename(video_info['data']['video']['title']),
-            created_at=clean_filename(time_str)
-        )
-
+    def __init__(self, filename: str):
         if not os.path.exists(os.path.dirname(filename)):
             os.makedirs(os.path.dirname(filename))
 
-        return io.open(filename, mode='w+', encoding='UTF8')
-
-    def __init__(self, video_id, format):
-        self.file = self.new_file(video_id, format)
+        self.file = io.open(filename, mode='w+', encoding='UTF8')
 
     @staticmethod
     def _duration(msg):
@@ -93,8 +59,8 @@ class Subtitle(object):
 
 
 class SubtitlesASS(Subtitle):
-    def __init__(self, video_id, format="ass"):
-        super(SubtitlesASS, self).__init__(video_id, format)
+    def __init__(self, filename: str):
+        super(SubtitlesASS, self).__init__(filename)
 
         self.line = settings['ssa_events_line_format'] + '\n'
 
@@ -142,8 +108,8 @@ class SubtitlesASS(Subtitle):
 
 
 class SubtitlesSRT(Subtitle):
-    def __init__(self, video_id):
-        super(SubtitlesSRT, self).__init__(video_id, "srt")
+    def __init__(self, filename: str):
+        super(SubtitlesSRT, self).__init__(filename)
         self.count = 0
 
     @staticmethod
@@ -167,8 +133,8 @@ class SubtitlesSRT(Subtitle):
 
 
 class SubtitlesIRC(Subtitle):
-    def __init__(self, video_id):
-        super(SubtitlesIRC, self).__init__(video_id, "irc")
+    def __init__(self, filename: str):
+        super(SubtitlesIRC, self).__init__(filename)
 
     @staticmethod
     def ftime(seconds):
@@ -183,18 +149,38 @@ class SubtitlesIRC(Subtitle):
 
 
 class SubtitleWriter:
-    def __init__(self, video_id):
+    @staticmethod
+    def clean_filename(string, valid_filename_regex=re.compile(r'(?u)[^-\w.()\[\]{}@%! ]')):
+        return re.sub(valid_filename_regex, '', string.strip())
+
+    @classmethod
+    def filename(cls, video: Messages, ext: str) -> str:
+        # TODO: make time configurable
+        time_str = str(video.created_at.replace(microsecond=0).replace(tzinfo=None).isoformat())
+
+        return settings['filename_format'].format(
+            directory=settings['directory'],
+            video_id=video.video_id,
+            format=ext,
+            user_name=cls.clean_filename(video.creator_name),
+            title=cls.clean_filename(video.title),
+            created_at=cls.clean_filename(time_str)
+        )
+
+    def __init__(self, video: Messages):
         self.drivers = set()
 
-        for format in settings['formats']:
-            if format in ("ass", "ssa"):
-                self.drivers.add(SubtitlesASS(video_id, format))
+        for ext in settings['formats']:
+            filename = self.filename(video, ext)
 
-            if format == "srt":
-                self.drivers.add(SubtitlesSRT(video_id))
+            if ext in ('ass', 'ssa'):
+                self.drivers.add(SubtitlesASS(filename))
 
-            if format == "irc":
-                self.drivers.add(SubtitlesIRC(video_id))
+            if ext == 'srt':
+                self.drivers.add(SubtitlesSRT(filename))
+
+            if ext == 'irc':
+                self.drivers.add(SubtitlesIRC(filename))
 
     def add(self, comment):
         [driver.add(comment) for driver in self.drivers]

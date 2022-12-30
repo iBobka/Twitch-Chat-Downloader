@@ -14,8 +14,9 @@ def generate_config():
 
 
 def download(video):
-    writer = SubtitleWriter(video)
-    for comment in Messages(video):
+    messages = Messages(video)
+    writer = SubtitleWriter(messages)
+    for comment in messages:
         writer.add(comment)
     writer.close()
 
