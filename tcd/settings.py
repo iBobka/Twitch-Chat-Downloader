@@ -102,7 +102,7 @@ def _post_init_parser(help=False):
         '--filename-format', metavar='FORMAT', type=str,
         default=settings['filename_format'],
         help=('Python str.format for generating output file names. Available '
-              'variables: {directory}, {video_id} and {format}.'))
+              'variables: {directory}, {video_id}, {format}, {user_name}, {title}, and {created_at}.'))
     settings_group.add_argument(
         '--max-width', metavar='chars', type=int,
         default=settings['max_width'],

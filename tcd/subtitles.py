@@ -5,11 +5,18 @@ from __future__ import unicode_literals
 
 import io
 import os
+import re
 import textwrap
 
 from datetime import timedelta, datetime as dtt
+from iso8601 import parse_date as parse8601
 
 from .settings import settings
+from .twitch import gql
+
+
+def clean_filename(string, valid_filename_regex=re.compile(r'(?u)[^-\w.()\[\]{}@%! ]')):
+    return re.sub(valid_filename_regex, '', string.strip())
 
 
 class Subtitle(object):
@@ -18,10 +25,29 @@ class Subtitle(object):
         if not os.path.exists(settings['directory']):
             os.makedirs(settings['directory'])
 
+        video_info = gql(f'''
+            query {{
+                video(id: {video_id}) {{
+                    creator {{
+                        displayName
+                    }}
+                    createdAt
+                    title
+                }}
+            }}
+        ''')
+
+        created_at = parse8601(video_info['data']['video']['createdAt'])
+        # TODO: make time configurable
+        time_str = str(created_at.replace(microsecond=0).replace(tzinfo=None).isoformat())
+
         filename = settings['filename_format'].format(
             directory=settings['directory'],
             video_id=video_id,
-            format=format
+            format=format,
+            user_name=clean_filename(video_info['data']['video']['creator']['displayName']),
+            title=clean_filename(video_info['data']['video']['title']),
+            created_at=clean_filename(time_str)
         )
 
         return io.open(filename, mode='w+', encoding='UTF8')
