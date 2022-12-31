@@ -81,9 +81,12 @@ class Message(object):
         self.user = comment['commenter']['displayName']
 
         if settings['badges']['enabled']:
-            badges = [settings['badges']['map'][badge['setID']]
-                      for badge in comment['commenter']['displayBadges']
-                      if badge['setID'] in settings['badges']['map']]
+            badge_ids = [badge['setID']
+                         for badge in comment['commenter']['displayBadges']]
+
+            badges = [val
+                      for key, val in settings['badges']['map'].items()
+                      if key in badge_ids]
 
             max_count = settings['badges']['max_count']
             if max_count >= 1:
