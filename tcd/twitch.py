@@ -9,7 +9,7 @@ from .settings import settings
 
 
 client = Session()
-client.headers['Acccept'] = 'application/vnd.twitchtv.v5+json'
+client.headers['Acccept'] = '*/*'
 client.headers['Client-ID'] = settings['client_id']
 
 # Configure retries for all requests
@@ -114,6 +114,8 @@ class Message(object):
         else:
             self.color = 'FFFFFF'
 
+    def hash(self) -> int:
+        return hash((self.offset, self.user, self.message))
 
 class Messages(object):
     def __init__(self, video_id):
@@ -145,12 +147,13 @@ class Messages(object):
     def __iter__(self):
         hasNextPage = True
         cursor = None
+        hashes = set()
 
         while hasNextPage:
             res = gql(f'''
                 query {{
                     video(id: "{self.video_id}") {{
-                        comments{f'(after: "{cursor}")' if cursor else ''} {{
+                        comments{f'(contentOffsetSeconds: {cursor})' if cursor else ''} {{
                             edges {{
                                 cursor
                                 node {{
@@ -184,7 +187,7 @@ class Messages(object):
             hasNextPage = comments['pageInfo']['hasNextPage']
 
             for comment in comments['edges']:
-                cursor = comment['cursor']
+                cursor = comment['node']['contentOffsetSeconds']
 
                 # Calculate more accurate offset
                 ts = parse8601(comment['node']['createdAt'])
@@ -192,9 +195,18 @@ class Messages(object):
                 comment['node']['contentOffsetSeconds'] = offset
 
                 try:
-                    yield Message(comment['node'])
+                    msg = Message(comment['node'])
                 except Exception:
                     continue
+            
+                msg_hash = msg.hash()
+
+                if msg_hash in hashes:
+                    continue
+                else:
+                    hashes.add(msg_hash)
+
+                yield msg
 
             if self.progressbar:
                 ts = comments['edges'][-1]['node']['contentOffsetSeconds']
