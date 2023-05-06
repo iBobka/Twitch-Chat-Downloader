@@ -146,14 +146,14 @@ class Messages(object):
     
     def __iter__(self):
         hasNextPage = True
-        cursor = None
+        cursor = 0
         hashes = set()
 
         while hasNextPage:
             res = gql(f'''
                 query {{
                     video(id: "{self.video_id}") {{
-                        comments{f'(contentOffsetSeconds: {cursor})' if cursor else ''} {{
+                        comments{f'(contentOffsetSeconds: {cursor})' if cursor > 0 else ''} {{
                             edges {{
                                 cursor
                                 node {{
@@ -186,9 +186,15 @@ class Messages(object):
             comments = res['data']['video']['comments']
             hasNextPage = comments['pageInfo']['hasNextPage']
 
-            for comment in comments['edges']:
-                cursor = comment['node']['contentOffsetSeconds']
+            # Avoid infinite loops
+            new_cursor = comments['edges'][-1]['node']['contentOffsetSeconds']
+            if new_cursor <= cursor:
+                cursor += 1
+                continue
+            else:
+                cursor = new_cursor
 
+            for comment in comments['edges']:
                 # Calculate more accurate offset
                 ts = parse8601(comment['node']['createdAt'])
                 offset = (ts - self.created_at).total_seconds()
