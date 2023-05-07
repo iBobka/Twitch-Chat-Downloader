@@ -209,13 +209,7 @@ class Messages(object):
             if offset == 0 or cursor:
                 cursor = comments['edges'][-1]['cursor']
 
-            # Avoid infinite loops
-            new_offset = comments['edges'][-1]['node']['contentOffsetSeconds']
-            if new_offset <= offset:
-                offset += 1
-                continue
-            else:
-                offset = new_offset
+            offset = comments['edges'][-1]['node']['contentOffsetSeconds'] + 1
 
             for comment in comments['edges']:
                 # Calculate more accurate offset
@@ -238,7 +232,7 @@ class Messages(object):
                 yield msg
 
             if self.progressbar:
-                ts = comments['edges'][-1]['node']['contentOffsetSeconds']
+                ts = offset - 1
                 self.progressbar.update(min(self.duration, ts))
 
             if settings['cooldown'] > 0:
