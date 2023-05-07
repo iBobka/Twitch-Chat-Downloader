@@ -143,62 +143,85 @@ class Messages(object):
 
         if settings.get('display_progress') in [None, True]:
             self.progressbar = ProgressBar(max_value=self.duration)
-    
-    def __iter__(self):
-        hasNextPage = True
-        cursor = 0
-        hashes = set()
 
-        while hasNextPage:
-            res = gql(f'''
-                query {{
-                    video(id: "{self.video_id}") {{
-                        comments{f'(contentOffsetSeconds: {cursor})' if cursor > 0 else ''} {{
-                            edges {{
-                                cursor
-                                node {{
-                                    commenter {{
-                                        displayName
-                                        login
-                                        displayBadges(channelID: {self.creator_id}) {{
-                                            setID
-                                        }}
-                                    }}
-                                    createdAt
-                                    contentOffsetSeconds
-                                    message {{
-                                        fragments {{
-                                            text
-                                        }}
-                                        userColor
+    def _get_comments(self, selector: str):
+        return gql(f'''
+            query {{
+                video(id: "{self.video_id}") {{
+                    comments{selector} {{
+                        edges {{
+                            cursor
+                            node {{
+                                commenter {{
+                                    displayName
+                                    login
+                                    displayBadges(channelID: {self.creator_id}) {{
+                                        setID
                                     }}
                                 }}
+                                createdAt
+                                contentOffsetSeconds
+                                message {{
+                                    fragments {{
+                                        text
+                                    }}
+                                    userColor
+                                }}
                             }}
+                        }}
 
-                            pageInfo {{
-                                hasNextPage
-                            }}
+                        pageInfo {{
+                            hasNextPage
                         }}
                     }}
                 }}
-            ''')
+            }}
+        ''')['data']['video']['comments']
 
-            comments = res['data']['video']['comments']
+    def __iter__(self):
+        hasNextPage = True
+        offset = 0
+        cursor = None
+        hashes = set()
+
+        while hasNextPage and offset <= self.duration:
+            if cursor:
+                selector = f'(after: "{cursor}")'
+            elif offset > 0:
+                selector = f'(contentOffsetSeconds: {offset})'
+            else:
+                selector = ''
+
+            comments = self._get_comments(selector)
+
+            if not comments or len(comments) == 0:
+                if cursor:
+                    print('WARN: Cursors are not working, '
+                          'falling back to content offset')
+                    cursor = None
+                    continue
+
+                break
+
+            # Always true without cursor
             hasNextPage = comments['pageInfo']['hasNextPage']
 
+            if offset == 0 or cursor:
+                cursor = comments['edges'][-1]['cursor']
+
             # Avoid infinite loops
-            new_cursor = comments['edges'][-1]['node']['contentOffsetSeconds']
-            if new_cursor <= cursor:
-                cursor += 1
+            new_offset = comments['edges'][-1]['node']['contentOffsetSeconds']
+            if new_offset <= offset:
+                offset += 1
                 continue
             else:
-                cursor = new_cursor
+                offset = new_offset
 
             for comment in comments['edges']:
                 # Calculate more accurate offset
                 ts = parse8601(comment['node']['createdAt'])
-                offset = (ts - self.created_at).total_seconds()
-                comment['node']['contentOffsetSeconds'] = offset
+                precise_offset = (ts - self.created_at).total_seconds()
+                comment['node']['contentOffsetSeconds'] = precise_offset
 
                 try:
                     msg = Message(comment['node'])
