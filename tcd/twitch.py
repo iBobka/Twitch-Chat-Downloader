@@ -123,7 +123,7 @@ class Messages(object):
 
         video = gql(f'''
             query {{
-                video(id: {video_id}) {{
+                video(id: "{video_id}") {{
                     creator {{
                         displayName
                         id
